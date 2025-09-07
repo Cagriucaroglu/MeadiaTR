@@ -1,0 +1,104 @@
+{
+    "description": "Comprehensive MCP Server Configuration for Full-Stack AI Development",
+    "_comment": "Production-ready MCP environment with debugging, analysis, and monitoring capabilities",
+    
+    "globalSettings": {
+        "timeout": 30000,
+        "retries": 3
+    },
+    
+    "mcpServers": {
+        "microsoft-docs": {
+            "description": "Official Microsoft/Azure documentation access via HTTP endpoint",
+            "_purpose": "Provides real-time access to Microsoft Learn documentation for development assistance",
+            "type": "http",
+            "url": "https://learn.microsoft.com/api/mcp",
+            "disabled": false,
+            "autoApprove": []
+        },
+        "context7": {
+            "description": "Real-time documentation and code examples for any library/framework",
+            "_purpose": "Retrieves up-to-date documentation and usage examples for coding assistance",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "npx",
+                "-y",
+                "@upstash/context7-mcp@latest"
+            ],
+            "disabled": false,
+            "autoApprove": []
+        },
+        "seq-thinking": {
+            "description": "Enhanced reasoning capabilities for complex problem solving",
+            "_purpose": "Provides step-by-step analytical thinking process for complex tasks and debugging",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "npx",
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ],
+            "disabled": false,
+            "autoApprove": []
+        },
+        "memory": {
+            "description": "Persistent knowledge graph for AI memory across sessions",
+            "_purpose": "Maintains context, entities, and relationships between development sessions",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "npx",
+                "-y",
+                "@modelcontextprotocol/server-memory"
+            ],
+            "env": {
+                "MEMORY_FILE_PATH": "${BTYON_DEV}\\optimate\\OptimatePlatform\\_Docs\\memory-graph.json"
+            },
+            "disabled": false,
+            "autoApprove": []
+        },
+        "nuget-search": {
+            "description": "NuGet package search and .NET dependency management",
+            "_purpose": "Package discovery, version checking, and dependency resolution for .NET projects",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "dnx",
+                "NuGet.Mcp.Server@0.1.2-preview",
+                "--yes"
+            ],
+            "disabled": false,
+            "autoApprove": []
+        },
+        "mssql-mcp": {
+            "description": "Local SQL Server database operations and management",
+            "_purpose": "Database operations, queries, schema management, and data analysis",
+            "command": "${McpServers}SqlMcp\\MssqlMcp\\bin\\Debug\\net8.0\\MssqlMcp.exe",
+            "args": [],
+            "env": {
+                "CONNECTION_STRING": "Server=.\\SQLEXPRESS;Database=IMS_TEST_DB;Trusted_Connection=True;TrustServerCertificate=True"
+            },
+            "disabled": false,
+            "autoApprove": []
+        },
+        "csMcp": {
+            "description": "Roslyn-based AI static code analysis tool",
+            "_purpose": "Provides comprehensive C# code analysis, syntax inspection, semantic analysis, and code quality assessment using Roslyn compiler services",
+            "command": "${McpServers}CsMcp\\publish\\CsMcp.Server.exe",
+            "args": [],
+            "cwd": "E:\\GitHub\\ek\\csmcp",
+            "env": {},
+            "timeout": 900000,
+            "disabled": false,
+            "autoApprove": []
+        }
+    },
+    
+    "_notes": [
+        "All custom MCP servers (dbgMcp, csMcp, mcpLogProbe) are built with .NET and support extended timeout for complex operations",
+        "Environment variables like ${McpServers} are resolved at runtime for portable paths",
+        "Custom servers focus on full-stack development: debugging, analysis, and monitoring",
+        "Blazor/MAUI applications supported through EvalHub integration in mcpLogProbe"
+    ]
+}

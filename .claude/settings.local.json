@@ -1,0 +1,12 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "microsoft-docs",
+    "context7",
+    "seq-thinking",
+    "memory",
+    "nuget-search",
+    "mssql-mcp",
+    "csMcp"
+  ]
+}
