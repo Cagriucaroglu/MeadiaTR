@@ -321,3 +321,49 @@ MeadiaTR/
    - ✅ Order entity'sine AddOrderItem() ve ClearOrderItems() metodları eklendi
    - ✅ OrderItemBusinessLogic ile OrderBusinessLogic ayrımı netleştirildi
    - ✅ MongoRepository ve tüm implementasyonlar Guid kullanacak şekilde güncellendi
+   
+   User entity için UserBusinessLogic yazmaya gerek yok. Şu nedenlerle:
+   1. Mevcut BusinessLogic sınıfları domain-specific business rules içeriyor:
+    - ProductBusinessLogic: Ürün fiyatlama, stok yönetimi, slug oluşturma
+    - CategoryBusinessLogic: Kategori hiyerarşisi, slug oluşturma
+    - AdvertisementBusinessLogic: İlan onay süreci, durum değişiklikleri
+    - OrderBusinessLogic: Sipariş yaşam döngüsü, iş kuralları
+   2. User için tipik business logic operations:
+    - User registration → Bu zaten Command/Handler'da yapılır
+    - Authentication → Ayrı bir servis (Identity/Auth service)
+    - Password reset → Ayrı bir servis
+    - Profile updates → Basit CRUD operations
+   3. YAGNI (You Aren't Gonna Need It) prensibi:
+    - Şu anda User için karmaşık business logic yok
+    - Gerektiğinde ekleyebiliriz
+   4. User işlemleri genellikle şu şekilde yapılır:
+    - Registration: CreateUserCommand + CreateUserCommandHandler
+    - Login: Authentication service
+    - Profile update: UpdateUserCommand + UpdateUserCommandHandler
+
+### 🔄 Son Güncelleme (26 Eylül 2024):
+1. **Order Module Tamamlandı** - ✅
+   - PlaceOrderCommand + PlaceOrderCommandHandler
+   - UpdateOrderStatusCommand + UpdateOrderStatusCommandHandler
+   - GetOrderQuery, GetUserOrdersQuery, GetPendingOrdersQuery + Handler'ları
+   - OrderPlacedEventHandler
+   - OrderItemDto, GetOrderResult DTO'ları
+   - OrderBusinessLogic ve OrderItemBusinessLogic
+
+2. **Devam Eden: Result Pattern Implementation** - 🔄
+   - ✅ SharedKernel/ResultAndError/Error.cs oluşturuldu
+   - ✅ SharedKernel/ResultAndError/Result.cs oluşturuldu
+   - ✅ Application/Abstractions/Messaging/ interface'leri oluşturuldu:
+     * IQuery<TResponse>
+     * ICommand, ICommand<TResponse>
+     * IQueryHandler<TQuery, TResponse>
+     * ICommandHandler<TCommand>, ICommandHandler<TCommand, TResponse>
+
+3. **Sonraki Adımlar:**
+   - Application/Orders/Errors/OrderErrors.cs oluştur
+   - Mevcut Order Commands/Queries'leri Result pattern'e çevir
+   - GetOrderQuery'yi IQuery<GetOrderResult> kullanacak şekilde güncelle
+   - PlaceOrderCommand'ı ICommand<Guid> kullanacak şekilde güncelle
+   - UpdateOrderStatusCommand'ı ICommand kullanacak şekilde güncelle
+   - Handler'ları Result<T> döndürecek şekilde güncelle
+   - Diğer feature'lardaki Commands/Queries'leri de Result pattern'e çevir

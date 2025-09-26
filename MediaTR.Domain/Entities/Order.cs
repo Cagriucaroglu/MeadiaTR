@@ -24,30 +24,17 @@ public class Order : BaseEntity
     public string? PaymentMethod { get; set; }
     public string? PaymentTransactionId { get; set; }
 
-    private readonly List<OrderItem> _orderItems = [];
-    public IReadOnlyCollection<OrderItem> OrderItems => _orderItems.AsReadOnly();
+    public List<OrderItem> OrderItems { get; set; } = [];
 
     public Money SubtotalAmount => Money.FromDecimal(
-        _orderItems.Sum(item => item.UnitPrice.Amount * item.Quantity),
+        OrderItems.Sum(item => item.UnitPrice.Amount * item.Quantity),
         TotalAmount.Currency
     );
 
-    public int TotalQuantity => _orderItems.Sum(item => item.Quantity);
+    public int TotalQuantity => OrderItems.Sum(item => item.Quantity);
 
     public bool CanBeCancelled => Status is OrderStatus.Pending or OrderStatus.Confirmed;
     public bool CanBeShipped => Status == OrderStatus.Processing;
     public bool IsCompleted => Status is OrderStatus.Delivered or OrderStatus.Cancelled or OrderStatus.Returned or OrderStatus.Refunded;
 
-    public void AddOrderItem(OrderItem orderItem)
-    {
-        if (orderItem == null)
-            throw new ArgumentNullException(nameof(orderItem));
-
-        _orderItems.Add(orderItem);
-    }
-
-    public void ClearOrderItems()
-    {
-        _orderItems.Clear();
-    }
 }

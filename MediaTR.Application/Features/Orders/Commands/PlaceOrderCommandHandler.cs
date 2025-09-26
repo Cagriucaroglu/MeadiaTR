@@ -61,7 +61,7 @@ public class PlaceOrderCommandHandler : IRequestHandler<PlaceOrderCommand, Guid>
         foreach (var itemDto in request.OrderItems)
         {
             var orderItem = await _orderItemBusinessLogic.CreateOrderItem(order.Id, itemDto.ProductId, itemDto.Quantity);
-            order.AddOrderItem(orderItem);
+            _orderBusinessLogic.AddOrderItem(order, orderItem);
             totalAmount += orderItem.TotalPrice.Amount;
             currency = orderItem.UnitPrice.Currency;
         }

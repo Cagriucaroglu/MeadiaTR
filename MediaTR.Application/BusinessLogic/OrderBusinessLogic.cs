@@ -106,4 +106,23 @@ public class OrderBusinessLogic
         order.UpdatedAt = DateTime.UtcNow;
     }
 
+    public void AddOrderItem(Order order, OrderItem orderItem)
+    {
+        if (order == null)
+            throw new ArgumentNullException(nameof(order));
+
+        if (orderItem == null)
+            throw new ArgumentNullException(nameof(orderItem));
+
+        order.OrderItems.Add(orderItem);
+    }
+
+    public void ClearOrderItems(Order order)
+    {
+        if (order == null)
+            throw new ArgumentNullException(nameof(order));
+
+        order.OrderItems.Clear();
+    }
+
 }
