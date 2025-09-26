@@ -1,0 +1,6 @@
+@MediaTR.ApiService_HostAddress = http://localhost:5027
+
+GET {{MediaTR.ApiService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
