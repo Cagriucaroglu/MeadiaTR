@@ -1,9 +1,9 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Orders.DTOs;
 
 namespace MediaTR.Application.Features.Orders.Queries;
 
-public class GetOrderQuery : IRequest<GetOrderResult?>
+public class GetOrderQuery : IQuery<GetOrderResult>
 {
     public Guid OrderId { get; set; }
 

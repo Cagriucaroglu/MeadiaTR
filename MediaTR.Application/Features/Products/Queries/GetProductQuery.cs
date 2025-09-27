@@ -1,9 +1,9 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Domain.ValueObjects;
 
 namespace MediaTR.Application.Features.Products.Queries;
 
-public record GetProductQuery(Guid Id) : IRequest<GetProductResult?>;
+public record GetProductQuery(Guid Id) : IQuery<GetProductResult>;
 
 public record GetProductResult(
     Guid Id,

@@ -1,4 +1,4 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Products.DTOs;
 using MediaTR.Domain.ValueObjects;
 
@@ -12,4 +12,4 @@ public record CreateProductCommand(
     string Sku,
     int StockQuantity,
     double Weight = 0
-) : IRequest<CreateProductResult>;
+) : ICommand<CreateProductResult>;

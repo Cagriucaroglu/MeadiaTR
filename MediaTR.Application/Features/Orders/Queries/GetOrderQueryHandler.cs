@@ -1,10 +1,12 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Orders.DTOs;
+using MediaTR.Application.Orders.Errors;
 using MediaTR.Domain.Repositories;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Orders.Queries;
 
-public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderResult?>
+public class GetOrderQueryHandler : IQueryHandler<GetOrderQuery, GetOrderResult>
 {
     private readonly IOrderRepository _orderRepository;
 
@@ -13,11 +15,11 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderResul
         _orderRepository = orderRepository;
     }
 
-    public async Task<GetOrderResult?> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetOrderResult>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
     {
         var order = await _orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
         if (order == null)
-            return null;
+            return OrderErrors.NotFound; // Implicit operator: Error → Result<GetOrderResult>
 
         var orderItems = order.OrderItems.Select(item => new OrderItemDto
         {
@@ -27,7 +29,7 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderResul
             Currency = item.UnitPrice.Currency
         }).ToList();
 
-        return new GetOrderResult(
+        var result = new GetOrderResult(
             order.Id,
             order.OrderNumber,
             order.UserId,
@@ -48,5 +50,7 @@ public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, GetOrderResul
             orderItems,
             order.TotalQuantity
         );
+
+        return result; // Implicit operator: GetOrderResult → Result<GetOrderResult>
     }
 }

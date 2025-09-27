@@ -53,4 +53,5 @@ public class Result<TValue> : Result, IResult<TValue>
         : throw new InvalidOperationException("The value of a failure result can't be accessed.");
 
     public static implicit operator Result<TValue>(TValue? value) => Create(value);
+    public static implicit operator Result<TValue>(Error error) => Failure<TValue>(error);
 }

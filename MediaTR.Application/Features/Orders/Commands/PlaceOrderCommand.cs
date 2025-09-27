@@ -1,10 +1,10 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Orders.DTOs;
 using MediaTR.Domain.ValueObjects;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
-public class PlaceOrderCommand : IRequest<Guid>
+public class PlaceOrderCommand : ICommand<Guid>
 {
     public Guid UserId { get; set; } 
     public Address ShippingAddress { get; set; }

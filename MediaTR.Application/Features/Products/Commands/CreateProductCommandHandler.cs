@@ -1,10 +1,11 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
 using MediaTR.Application.Features.Products.DTOs;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Products.Commands;
 
-public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, CreateProductResult>
+public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand, CreateProductResult>
 {
     private readonly ProductBusinessLogic _productBusinessLogic;
 
@@ -13,7 +14,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         _productBusinessLogic = productBusinessLogic;
     }
 
-    public async Task<CreateProductResult> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateProductResult>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         // Delegate to business logic
         var product = _productBusinessLogic.CreateProduct(
@@ -29,7 +30,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         // TODO: Save to repository
         // await _productRepository.AddAsync(product, cancellationToken);
 
-        // Return result
+        // Return result using implicit operator
         return new CreateProductResult(
             product.Id,
             product.Name,

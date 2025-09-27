@@ -1,23 +1,32 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Orders.DTOs;
+using MediaTR.Application.Orders.Errors;
 using MediaTR.Domain.Repositories;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Orders.Queries;
 
-public class GetUserOrdersQueryHandler : IRequestHandler<GetUserOrdersQuery, List<GetOrderResult>>
+public class GetUserOrdersQueryHandler : IQueryHandler<GetUserOrdersQuery, List<GetOrderResult>>
 {
     private readonly IOrderRepository _orderRepository;
+    private readonly IUserRepository _userRepository;
 
-    public GetUserOrdersQueryHandler(IOrderRepository orderRepository)
+    public GetUserOrdersQueryHandler(IOrderRepository orderRepository, IUserRepository userRepository)
     {
         _orderRepository = orderRepository;
+        _userRepository = userRepository;
     }
 
-    public async Task<List<GetOrderResult>> Handle(GetUserOrdersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetOrderResult>>> Handle(GetUserOrdersQuery request, CancellationToken cancellationToken)
     {
+        // Check if user exists
+        var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        if (user == null)
+            return OrderErrors.UserNotFound(request.UserId);
+
         var orders = await _orderRepository.GetByUserIdAsync(request.UserId, cancellationToken);
 
-        return orders.Select(order =>
+        var result = orders.Select(order =>
         {
             var orderItems = order.OrderItems.Select(item => new OrderItemDto
             {
@@ -49,5 +58,7 @@ public class GetUserOrdersQueryHandler : IRequestHandler<GetUserOrdersQuery, Lis
                 order.TotalQuantity
             );
         }).ToList();
+
+        return result; // Implicit operator: List<GetOrderResult> → Result<List<GetOrderResult>>
     }
 }

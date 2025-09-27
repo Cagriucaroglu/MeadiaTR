@@ -1,4 +1,4 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Advertisements.DTOs;
 using MediaTR.Domain.ValueObjects;
 
@@ -14,4 +14,4 @@ public record CreateAdvertisementCommand(
     bool IsUrgent = false,
     string? ContactPhone = null,
     string? ContactEmail = null
-) : IRequest<CreateAdvertisementResult>;
+) : ICommand<CreateAdvertisementResult>;

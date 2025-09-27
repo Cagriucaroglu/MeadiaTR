@@ -1,10 +1,11 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
 using MediaTR.Application.Features.Advertisements.DTOs;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Advertisements.Commands;
 
-public class CreateAdvertisementCommandHandler : IRequestHandler<CreateAdvertisementCommand, CreateAdvertisementResult>
+public class CreateAdvertisementCommandHandler : ICommandHandler<CreateAdvertisementCommand, CreateAdvertisementResult>
 {
     private readonly AdvertisementBusinessLogic _advertisementBusinessLogic;
 
@@ -13,7 +14,7 @@ public class CreateAdvertisementCommandHandler : IRequestHandler<CreateAdvertise
         _advertisementBusinessLogic = advertisementBusinessLogic;
     }
 
-    public async Task<CreateAdvertisementResult> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateAdvertisementResult>> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
     {
         // Delegate to business logic
         var advertisement = _advertisementBusinessLogic.CreateAdvertisement(
@@ -32,7 +33,7 @@ public class CreateAdvertisementCommandHandler : IRequestHandler<CreateAdvertise
         // await _advertisementRepository.AddAsync(advertisement, cancellationToken);
 
         // Return result
-        return new CreateAdvertisementResult(
+        return Result.Success(new CreateAdvertisementResult(
             advertisement.Id,
             advertisement.Title,
             advertisement.ProductId,
@@ -41,6 +42,6 @@ public class CreateAdvertisementCommandHandler : IRequestHandler<CreateAdvertise
             advertisement.Status.ToString(),
             advertisement.IsNegotiable,
             advertisement.IsUrgent
-        );
+        ));
     }
 }

@@ -1,8 +1,9 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Products.Queries;
 
-public class GetProductQueryHandler : IRequestHandler<GetProductQuery, GetProductResult?>
+public class GetProductQueryHandler : IQueryHandler<GetProductQuery, GetProductResult>
 {
     // TODO: Add repository injection
     // private readonly IProductRepository _productRepository;
@@ -12,7 +13,7 @@ public class GetProductQueryHandler : IRequestHandler<GetProductQuery, GetProduc
         // _productRepository = productRepository;
     }
 
-    public async Task<GetProductResult?> Handle(GetProductQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetProductResult>> Handle(GetProductQuery request, CancellationToken cancellationToken)
     {
         // TODO: Get from repository
         // var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
@@ -35,6 +36,7 @@ public class GetProductQueryHandler : IRequestHandler<GetProductQuery, GetProduc
         //     product.MainImageUrl
         // );
 
-        return null; // TODO: Implement when repository is ready
+        // TODO: Implement when repository is ready
+        return Error.NotFound("Product.NotFound", "Product not found");
     }
 }

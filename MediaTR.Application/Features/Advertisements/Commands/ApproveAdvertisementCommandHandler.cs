@@ -1,10 +1,11 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
 using MediaTR.Domain.Entities;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Advertisements.Commands;
 
-public class ApproveAdvertisementCommandHandler : IRequestHandler<ApproveAdvertisementCommand, ApproveAdvertisementResult>
+public class ApproveAdvertisementCommandHandler : ICommandHandler<ApproveAdvertisementCommand, ApproveAdvertisementResult>
 {
     private readonly AdvertisementBusinessLogic _advertisementBusinessLogic;
 
@@ -13,7 +14,7 @@ public class ApproveAdvertisementCommandHandler : IRequestHandler<ApproveAdverti
         _advertisementBusinessLogic = advertisementBusinessLogic;
     }
 
-    public async Task<ApproveAdvertisementResult> Handle(ApproveAdvertisementCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ApproveAdvertisementResult>> Handle(ApproveAdvertisementCommand request, CancellationToken cancellationToken)
     {
         // TODO: Get advertisement from repository
         // var advertisement = await _advertisementRepository.GetByIdAsync(request.AdvertisementId, cancellationToken);
@@ -35,11 +36,11 @@ public class ApproveAdvertisementCommandHandler : IRequestHandler<ApproveAdverti
         // await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // Return result
-        return new ApproveAdvertisementResult(
+        return Result.Success(new ApproveAdvertisementResult(
             advertisement.Id,
             advertisement.Status.ToString(),
             advertisement.PublishedAt,
             advertisement.ExpiresAt
-        );
+        ));
     }
 }

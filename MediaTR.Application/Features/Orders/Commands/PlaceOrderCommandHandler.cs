@@ -1,14 +1,17 @@
 using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
+using MediaTR.Application.Orders.Errors;
 using MediaTR.Domain.Entities;
 using MediaTR.Domain.Enums;
 using MediaTR.Domain.Events;
 using MediaTR.Domain.Repositories;
 using MediaTR.Domain.ValueObjects;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
-public class PlaceOrderCommandHandler : IRequestHandler<PlaceOrderCommand, Guid>
+public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IUserRepository _userRepository;
@@ -30,12 +33,12 @@ public class PlaceOrderCommandHandler : IRequestHandler<PlaceOrderCommand, Guid>
         _mediator = mediator;
     }
 
-    public async Task<Guid> Handle(PlaceOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(PlaceOrderCommand request, CancellationToken cancellationToken)
     {
         // Kullanıcı kontrolü
         User? user = await _userRepository.GetByIdAsync(request.UserId);
         if (user == null)
-            throw new InvalidOperationException($"User with Id {request.UserId} not found");
+            return Result.Failure<Guid>(OrderErrors.UserNotFound(request.UserId));
 
         // Sipariş oluştur
         Order order = new Order
@@ -77,6 +80,6 @@ public class PlaceOrderCommandHandler : IRequestHandler<PlaceOrderCommand, Guid>
         // Domain event publish edilecek (OrderBusinessLogic içinde order.Raise() çağrıldı)
         await _mediator.Publish(new OrderPlacedEvent(order.Id, order.UserId, order.OrderNumber, order.TotalAmount, order.TotalQuantity), cancellationToken);
 
-        return order.Id;
+        return Result.Success(order.Id);
     }
 }
