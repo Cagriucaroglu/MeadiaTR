@@ -1,6 +1,8 @@
 
+using MediaTR.ApiService.Extensions;
 using MediaTR.Application;
 using MediaTR.Infrastructure;
+using Serilog;
 
 namespace MediaTR.ApiService
 {
@@ -10,11 +12,15 @@ namespace MediaTR.ApiService
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add Serilog
+            builder.Host.UseSerilog((context, loggerConfig) =>
+                loggerConfig.ReadFrom.Configuration(context.Configuration));
+
             // Add service defaults
             builder.AddServiceDefaults();
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddProblemDetails(); // RFC 7807 standard
 
             // Add Application layer (MediatR, etc.)
             builder.Services.AddApplication();
@@ -35,8 +41,18 @@ namespace MediaTR.ApiService
                 app.MapOpenApi();
             }
 
+            // Built-in exception handling (OptimatePlatform approach)
+            app.UseExceptionHandler();
+
+            // Custom CorrelationId tracking middleware
+            app.UseRequestContextLogging();
+
+            // Built-in Serilog request logging
+            app.UseSerilogRequestLogging();
+
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

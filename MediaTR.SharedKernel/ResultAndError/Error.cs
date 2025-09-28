@@ -30,6 +30,12 @@ public sealed record Error
 
     public static Error Conflict(string code, string description) =>
         new(code, description, ErrorType.Conflict);
+
+    public static Error Unauthorized(string code, string description) =>
+        new(code, description, ErrorType.Unauthorized);
+
+    public static Error Forbidden(string code, string description) =>
+        new(code, description, ErrorType.Forbidden);
 }
 
 public enum ErrorType
@@ -38,5 +44,7 @@ public enum ErrorType
     Validation = 1,
     Problem = 2,
     NotFound = 3,
-    Conflict = 4
+    Conflict = 4,
+    Unauthorized = 5,
+    Forbidden = 6
 }

@@ -78,7 +78,18 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
         await _orderRepository.AddAsync(order);
 
         // Domain event publish edilecek (OrderBusinessLogic içinde order.Raise() çağrıldı)
-        await _mediator.Publish(new OrderPlacedEvent(order.Id, order.UserId, order.OrderNumber, order.TotalAmount, order.TotalQuantity), cancellationToken);
+        await _mediator.Publish(new OrderPlacedEvent
+        {
+            CorrelationId = Guid.NewGuid(),
+            Payload = new Order
+            {
+                Id = order.Id,
+                UserId = order.UserId,
+                OrderDate = order.OrderDate,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod
+            }
+        }, cancellationToken);
 
         return Result.Success(order.Id);
     }

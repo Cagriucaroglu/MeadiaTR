@@ -396,8 +396,35 @@ MeadiaTR/
    - Tüm Command/Query/Handler dosyalarını yeni ICommand, IQuery, ICommandHandler, IQueryHandler interface'lerini kullanacak şekilde çeviriyoruz
    - Error handling ve implicit operator kullanımını örnekliyoruz
 
-4. **Sonraki Adımlar:**
-   - Kalan Features klasöründeki dosyaları Result pattern'e çevir
-   - API Controller'ları Result pattern'i handle edecek şekilde güncelle
-   - Domain-specific error sınıfları oluştur (ProductErrors, CategoryErrors, AdvertisementErrors)
-   - Global exception handling middleware ekle
+4. **✅ Domain Event Modernization Tamamlandı (27 Eylül 2024):**
+   - ✅ **DomainEvent<T> Record Pattern** oluşturuldu (OptimatePlatform standardı)
+   - ✅ **Event Class'ları Record'a dönüştürüldü**:
+     * `OrderPlacedEvent : DomainEvent<Order>`
+     * `ProductCreatedEvent : DomainEvent<Product>`
+     * `AdvertisementPublishedEvent : DomainEvent<Advertisement>`
+     * `UserRegisteredEvent : DomainEvent<User>`
+   - ✅ **Event Handler'lar güncellendi** (notification.Payload kullanımı)
+   - ✅ **Business Logic'te event raising güncellendi** (Payload + CorrelationId)
+
+5. **✅ Error Architecture Refactoring (27 Eylül 2024):**
+   - ✅ **OrderErrors.cs Domain katmanına taşındı**: `MediaTR.Domain\Errors\OrderErrors.cs`
+   - ✅ **Namespace güncellendi**: `MediaTR.Application.Orders.Errors` → `MediaTR.Domain.Errors`
+   - ✅ **Tüm using'ler güncellendi** (4 dosya)
+   - ✅ **Clean Architecture compliance** sağlandı
+
+6. **Sonraki Adımlar:**
+   - ✅ Domain-specific error sınıfları oluştur (ProductErrors, CategoryErrors, AdvertisementErrors)
+   - ✅ API Controller'ları Result pattern'i handle edecek şekilde güncelle (ResultExtensions.cs - ASP.IResult)
+
+7. **🔄 Middleware Architecture Implementation (OptimatePlatform Approach):**
+   - Built-in middleware'leri kullan (UseExceptionHandler, UseSerilogRequestLogging)
+   - RequestContextLoggingMiddleware oluştur (CorrelationId tracking)
+   - Clean separation of concerns uygula
+   - Serilog structured logging entegrasyonu
+   - Program.cs'i OptimatePlatform standardında güncelle
+
+8. **Gelecek Adımlar:**
+   - Repository pattern implementation (MongoDB/EF Core)
+   - Minimal API endpoints implementation
+   - API endpoints testing
+   - Authentication/Authorization setup
