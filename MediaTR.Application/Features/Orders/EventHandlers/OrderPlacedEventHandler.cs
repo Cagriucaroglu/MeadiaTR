@@ -15,8 +15,10 @@ public class OrderPlacedEventHandler : INotificationHandler<OrderPlacedEvent>
 
     public async Task Handle(OrderPlacedEvent notification, CancellationToken cancellationToken)
     {
+        var order = notification.Payload;
+
         _logger.LogInformation("Order placed: OrderId={OrderId}, UserId={UserId}, OrderNumber={OrderNumber}, TotalAmount={TotalAmount}",
-            notification.OrderId, notification.UserId, notification.OrderNumber, notification.TotalAmount);
+            order.Id, order.UserId, order.OrderNumber, order.TotalAmount);
 
         // Burada sipariş verildikten sonra yapılacak işlemler:
         // - Email gönderme

@@ -35,12 +35,12 @@ public class ApproveAdvertisementCommandHandler : ICommandHandler<ApproveAdverti
         // await _advertisementRepository.UpdateAsync(advertisement, cancellationToken);
         // await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Return result
-        return Result.Success(new ApproveAdvertisementResult(
+        // Return result using implicit operator
+        return new ApproveAdvertisementResult(
             advertisement.Id,
             advertisement.Status.ToString(),
             advertisement.PublishedAt,
             advertisement.ExpiresAt
-        ));
+        );
     }
 }

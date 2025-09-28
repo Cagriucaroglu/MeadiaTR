@@ -38,7 +38,11 @@ public class ProductBusinessLogic
         };
 
         // Raise domain event
-        product.Raise(new ProductCreatedEvent(product.Id, product.Name, product.Price, product.CategoryId));
+        product.Raise(new ProductCreatedEvent
+        {
+            Payload = product,
+            CorrelationId = Guid.NewGuid()
+        });
 
         return product;
     }

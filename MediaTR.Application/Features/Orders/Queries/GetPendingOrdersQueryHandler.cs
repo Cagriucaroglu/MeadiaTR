@@ -1,11 +1,12 @@
-using MediatR;
+using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Orders.DTOs;
 using MediaTR.Domain.Enums;
 using MediaTR.Domain.Repositories;
+using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Orders.Queries;
 
-public class GetPendingOrdersQueryHandler : IRequestHandler<GetPendingOrdersQuery, List<GetOrderResult>>
+public class GetPendingOrdersQueryHandler : IQueryHandler<GetPendingOrdersQuery, List<GetOrderResult>>
 {
     private readonly IOrderRepository _orderRepository;
 
@@ -14,11 +15,11 @@ public class GetPendingOrdersQueryHandler : IRequestHandler<GetPendingOrdersQuer
         _orderRepository = orderRepository;
     }
 
-    public async Task<List<GetOrderResult>> Handle(GetPendingOrdersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetOrderResult>>> Handle(GetPendingOrdersQuery request, CancellationToken cancellationToken)
     {
         var orders = await _orderRepository.GetByStatusAsync(OrderStatus.Pending, cancellationToken);
 
-        return orders.Select(order =>
+        var result = orders.Select(order =>
         {
             var orderItems = order.OrderItems.Select(item => new OrderItemDto
             {
@@ -50,5 +51,7 @@ public class GetPendingOrdersQueryHandler : IRequestHandler<GetPendingOrdersQuer
                 order.TotalQuantity
             );
         }).ToList();
+
+        return result; // Implicit operator: List<GetOrderResult> → Result<List<GetOrderResult>>
     }
 }

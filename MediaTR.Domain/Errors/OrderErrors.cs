@@ -1,6 +1,6 @@
 using MediaTR.SharedKernel.ResultAndError;
 
-namespace MediaTR.Application.Orders.Errors;
+namespace MediaTR.Domain.Errors;
 
 public static class OrderErrors
 {

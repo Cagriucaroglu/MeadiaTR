@@ -1,6 +1,6 @@
 using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.Features.Orders.DTOs;
-using MediaTR.Application.Orders.Errors;
+using MediaTR.Domain.Errors;
 using MediaTR.Domain.Repositories;
 using MediaTR.SharedKernel.ResultAndError;
 

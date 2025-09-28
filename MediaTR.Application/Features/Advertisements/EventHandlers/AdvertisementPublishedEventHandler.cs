@@ -15,9 +15,11 @@ public class AdvertisementPublishedEventHandler : INotificationHandler<Advertise
 
     public async Task Handle(AdvertisementPublishedEvent notification, CancellationToken cancellationToken)
     {
+        var advertisement = notification.Payload;
+
         _logger.LogInformation("Advertisement published: {AdvertisementId} - {Title}",
-            notification.AdvertisementId,
-            notification.Title);
+            advertisement.Id,
+            advertisement.Title);
 
         // TODO: Send notification to interested users
         // TODO: Update search index

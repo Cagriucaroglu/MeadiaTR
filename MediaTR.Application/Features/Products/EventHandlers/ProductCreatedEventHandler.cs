@@ -15,9 +15,11 @@ public class ProductCreatedEventHandler : INotificationHandler<ProductCreatedEve
 
     public async Task Handle(ProductCreatedEvent notification, CancellationToken cancellationToken)
     {
+        var product = notification.Payload;
+
         _logger.LogInformation("Product created: {ProductId} - {ProductName}",
-            notification.ProductId,
-            notification.Name);
+            product.Id,
+            product.Name);
 
         // TODO: Update search index
         // TODO: Send notification to subscribers

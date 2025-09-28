@@ -65,8 +65,11 @@ public class AdvertisementBusinessLogic
         advertisement.UpdatedAt = DateTime.UtcNow;
 
         // Raise domain event
-        advertisement.Raise(new AdvertisementPublishedEvent(
-            advertisement.Id, advertisement.ProductId, advertisement.SellerId, advertisement.Price, advertisement.Title));
+        advertisement.Raise(new AdvertisementPublishedEvent
+        {
+            Payload = advertisement,
+            CorrelationId = Guid.NewGuid()
+        });
     }
 
     public void Reject(Advertisement advertisement)

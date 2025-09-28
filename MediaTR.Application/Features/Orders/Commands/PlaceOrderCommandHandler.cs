@@ -1,7 +1,7 @@
 using MediatR;
 using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
-using MediaTR.Application.Orders.Errors;
+using MediaTR.Domain.Errors;
 using MediaTR.Domain.Entities;
 using MediaTR.Domain.Enums;
 using MediaTR.Domain.Events;

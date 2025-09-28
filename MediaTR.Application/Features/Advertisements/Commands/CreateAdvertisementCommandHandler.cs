@@ -32,8 +32,8 @@ public class CreateAdvertisementCommandHandler : ICommandHandler<CreateAdvertise
         // TODO: Save to repository
         // await _advertisementRepository.AddAsync(advertisement, cancellationToken);
 
-        // Return result
-        return Result.Success(new CreateAdvertisementResult(
+        // Return result using implicit operator
+        return new CreateAdvertisementResult(
             advertisement.Id,
             advertisement.Title,
             advertisement.ProductId,
@@ -42,6 +42,6 @@ public class CreateAdvertisementCommandHandler : ICommandHandler<CreateAdvertise
             advertisement.Status.ToString(),
             advertisement.IsNegotiable,
             advertisement.IsUrgent
-        ));
+        );
     }
 }

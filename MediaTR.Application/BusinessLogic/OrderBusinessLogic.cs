@@ -46,8 +46,11 @@ public class OrderBusinessLogic
         order.UpdatedAt = DateTime.UtcNow;
 
         // Raise domain event
-        order.Raise(new OrderPlacedEvent(
-            order.Id, order.UserId, order.OrderNumber, order.TotalAmount, order.TotalQuantity));
+        order.Raise(new OrderPlacedEvent
+        {
+            Payload = order,
+            CorrelationId = Guid.NewGuid()
+        });
     }
 
     public void ConfirmOrder(Order order)

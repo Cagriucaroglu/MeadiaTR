@@ -15,9 +15,11 @@ public class UserRegisteredEventHandler : INotificationHandler<UserRegisteredEve
 
     public async Task Handle(UserRegisteredEvent notification, CancellationToken cancellationToken)
     {
+        var user = notification.Payload;
+
         _logger.LogInformation("User registered: {UserId} - {Email}",
-            notification.UserId,
-            notification.Email.Value);
+            user.Id,
+            user.Email.Value);
 
         // TODO: Send welcome email
         // TODO: Create user profile
