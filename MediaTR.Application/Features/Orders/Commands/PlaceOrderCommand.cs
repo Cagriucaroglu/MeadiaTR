@@ -4,12 +4,19 @@ using MediaTR.Domain.ValueObjects;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
-public class PlaceOrderCommand : ICommand<Guid>
+public record PlaceOrderCommand(
+    Guid UserId,
+    List<OrderItemRequest> OrderItems,
+    Address ShippingAddress,
+    Address BillingAddress,
+    string? Notes = null,
+    string? PaymentMethod = null
+) : ICommand<Guid>
 {
-    public Guid UserId { get; set; } 
-    public Address ShippingAddress { get; set; }
-    public Address BillingAddress { get; set; }
-    public string? Notes { get; set; }
-    public string? PaymentMethod { get; set; }
-    public List<OrderItemDto> OrderItems { get; set; } = [];
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }
+
+public record OrderItemRequest(
+    Guid ProductId,
+    int Quantity,
+    Money UnitPrice);

@@ -16,7 +16,7 @@ public class OrderBusinessLogic
         _productRepository = productRepository;
     }
 
-    public async Task PlaceOrder(Order order)
+    public async Task PlaceOrder(Order order, Guid correlationId)
     {
         // Business rule validation
         if (order.OrderItems == null || !order.OrderItems.Any())
@@ -45,11 +45,11 @@ public class OrderBusinessLogic
         order.CreatedAt = DateTime.UtcNow;
         order.UpdatedAt = DateTime.UtcNow;
 
-        // Raise domain event
+        // Raise domain event with request CorrelationId
         order.Raise(new OrderPlacedEvent
         {
             Payload = order,
-            CorrelationId = Guid.NewGuid()
+            CorrelationId = correlationId
         });
     }
 

@@ -416,15 +416,25 @@ MeadiaTR/
    - ✅ Domain-specific error sınıfları oluştur (ProductErrors, CategoryErrors, AdvertisementErrors)
    - ✅ API Controller'ları Result pattern'i handle edecek şekilde güncelle (ResultExtensions.cs - ASP.IResult)
 
-7. **🔄 Middleware Architecture Implementation (OptimatePlatform Approach):**
-   - Built-in middleware'leri kullan (UseExceptionHandler, UseSerilogRequestLogging)
-   - RequestContextLoggingMiddleware oluştur (CorrelationId tracking)
-   - Clean separation of concerns uygula
-   - Serilog structured logging entegrasyonu
-   - Program.cs'i OptimatePlatform standardında güncelle
+7. **✅ Middleware Architecture Implementation (OptimatePlatform Approach) - Tamamlandı:**
+   - ✅ Built-in middleware'leri kullan (UseExceptionHandler, UseSerilogRequestLogging)
+   - ✅ RequestContextLoggingMiddleware oluştur (CorrelationId tracking)
+   - ✅ Clean separation of concerns uygula
+   - ✅ Serilog structured logging entegrasyonu
+   - ✅ Program.cs'i OptimatePlatform standardında güncelle
 
-8. **Gelecek Adımlar:**
+8. **🔄 CorrelationId Pattern Implementation (OptimatePlatform Approach) - DEVAM EDİYOR:**
+   - ✅ PlaceOrderCommand'a CorrelationId eklendi (auto-generated)
+   - ✅ OrderBusinessLogic.PlaceOrder() metoduna correlationId parametresi eklendi
+   - ✅ Domain event'te request CorrelationId kullanılıyor
+   - ✅ Manual mediator.Publish() kaldırıldı (domain events pattern)
+   - 🔄 **KALAN**: Diğer Command'lere CorrelationId ekle (UpdateOrderStatusCommand, vs.)
+   - 🔄 **KALAN**: Query'lere CorrelationId ekle
+   - 🔄 **KALAN**: Tüm BusinessLogic metodlarına correlationId parametresi ekle
+
+9. **Gelecek Adımlar:**
    - Repository pattern implementation (MongoDB/EF Core)
    - Minimal API endpoints implementation
    - API endpoints testing
    - Authentication/Authorization setup
+()

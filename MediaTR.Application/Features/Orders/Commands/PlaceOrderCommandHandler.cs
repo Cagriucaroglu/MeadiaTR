@@ -72,24 +72,25 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
         order.TotalAmount = Money.Create(totalAmount, currency);
 
         // Business logic validation and processing
-        await _orderBusinessLogic.PlaceOrder(order);
+        await _orderBusinessLogic.PlaceOrder(order, request.CorrelationId);
 
         // Repository'ye kaydet
         await _orderRepository.AddAsync(order);
 
         // Domain event publish edilecek (OrderBusinessLogic içinde order.Raise() çağrıldı)
-        await _mediator.Publish(new OrderPlacedEvent
-        {
-            CorrelationId = Guid.NewGuid(),
-            Payload = new Order
-            {
-                Id = order.Id,
-                UserId = order.UserId,
-                OrderDate = order.OrderDate,
-                TotalAmount = order.TotalAmount,
-                PaymentMethod = order.PaymentMethod
-            }
-        }, cancellationToken);
+        //await _mediator.Publish(new OrderPlacedEvent
+        //{
+        //    CorrelationId = Guid.NewGuid(),
+        //    Payload = new Order
+        //    {
+        //        Id = order.Id,
+        //        UserId = order.UserId,
+        //        OrderDate = order.OrderDate,
+        //        TotalAmount = order.TotalAmount,
+        //        PaymentMethod = order.PaymentMethod
+        //    }
+        //}, cancellationToken);
+        // Request'teki CorrelationId kullanılıyor
 
         return Result.Success(order.Id);
     }
