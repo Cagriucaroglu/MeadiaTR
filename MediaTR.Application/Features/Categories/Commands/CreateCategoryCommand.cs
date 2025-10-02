@@ -8,4 +8,7 @@ public record CreateCategoryCommand(
     string Description,
     Guid? ParentCategoryId = null,
     int SortOrder = 0
-) : ICommand<CreateCategoryResult>;
+) : ICommand<CreateCategoryResult>
+{
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+};

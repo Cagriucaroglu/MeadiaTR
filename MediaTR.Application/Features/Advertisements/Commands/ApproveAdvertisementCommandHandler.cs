@@ -29,7 +29,7 @@ public class ApproveAdvertisementCommandHandler : ICommandHandler<ApproveAdverti
         };
 
         // Delegate to business logic - this will handle business rules and raise domain events
-        _advertisementBusinessLogic.Approve(advertisement);
+        _advertisementBusinessLogic.Approve(advertisement, request.CorrelationId);
 
         // TODO: Save changes to repository
         // await _advertisementRepository.UpdateAsync(advertisement, cancellationToken);

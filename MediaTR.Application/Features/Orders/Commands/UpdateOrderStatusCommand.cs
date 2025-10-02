@@ -3,10 +3,12 @@ using MediaTR.Domain.Enums;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
-public class UpdateOrderStatusCommand : ICommand
+public record UpdateOrderStatusCommand(
+    Guid OrderId,
+    OrderStatus NewStatus,
+    string? Notes = null,
+    string? TrackingNumber = null
+) : ICommand
 {
-    public Guid OrderId { get; set; }
-    public OrderStatus NewStatus { get; set; }
-    public string? Notes { get; set; }
-    public string? TrackingNumber { get; set; }
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

@@ -24,6 +24,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand,
             request.Price,
             request.Sku,
             request.StockQuantity,
+            request.CorrelationId,
             request.Weight
         );
 

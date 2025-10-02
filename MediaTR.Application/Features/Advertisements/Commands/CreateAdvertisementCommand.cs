@@ -14,4 +14,7 @@ public record CreateAdvertisementCommand(
     bool IsUrgent = false,
     string? ContactPhone = null,
     string? ContactEmail = null
-) : ICommand<CreateAdvertisementResult>;
+) : ICommand<CreateAdvertisementResult>
+{
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+};

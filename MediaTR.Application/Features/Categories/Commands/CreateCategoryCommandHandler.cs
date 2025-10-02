@@ -20,6 +20,7 @@ public class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryComman
         var category = _categoryBusinessLogic.CreateCategory(
             request.Name,
             request.Description,
+            request.CorrelationId,
             request.ParentCategoryId,
             request.SortOrder
         );

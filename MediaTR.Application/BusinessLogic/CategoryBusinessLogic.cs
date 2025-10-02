@@ -5,7 +5,7 @@ namespace MediaTR.Application.BusinessLogic;
 
 public class CategoryBusinessLogic
 {
-    public Category CreateCategory(string name, string description, Guid? parentCategoryId = null, int sortOrder = 0)
+    public Category CreateCategory(string name, string description, Guid correlationId, Guid? parentCategoryId = null, int sortOrder = 0)
     {
         // Business validation
         if (string.IsNullOrWhiteSpace(name))

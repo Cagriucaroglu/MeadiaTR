@@ -9,7 +9,7 @@ namespace MediaTR.Application.BusinessLogic;
 public class AdvertisementBusinessLogic
 {
     public Advertisement CreateAdvertisement(string title, string description, Guid productId, Guid sellerId,
-        Money price, bool isNegotiable = false, bool isUrgent = false, string? contactPhone = null, string? contactEmail = null)
+        Money price, Guid correlationId, bool isNegotiable = false, bool isUrgent = false, string? contactPhone = null, string? contactEmail = null)
     {
         // Business validation
         if (string.IsNullOrWhiteSpace(title))
@@ -53,7 +53,7 @@ public class AdvertisementBusinessLogic
         advertisement.UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Approve(Advertisement advertisement)
+    public void Approve(Advertisement advertisement, Guid correlationId)
     {
         // Business rule validation
         if (advertisement.Status != AdvertisementStatus.PendingApproval)
@@ -68,7 +68,7 @@ public class AdvertisementBusinessLogic
         advertisement.Raise(new AdvertisementPublishedEvent
         {
             Payload = advertisement,
-            CorrelationId = Guid.NewGuid()
+            CorrelationId = correlationId
         });
     }
 

@@ -33,21 +33,21 @@ public class UpdateOrderStatusCommandHandler : ICommandHandler<UpdateOrderStatus
             switch (request.NewStatus)
             {
                 case OrderStatus.Confirmed:
-                    _orderBusinessLogic.ConfirmOrder(order);
+                    _orderBusinessLogic.ConfirmOrder(order, request.CorrelationId);
                     break;
                 case OrderStatus.Processing:
-                    _orderBusinessLogic.ProcessOrder(order);
+                    _orderBusinessLogic.ProcessOrder(order, request.CorrelationId);
                     break;
                 case OrderStatus.Shipped:
                     if (string.IsNullOrWhiteSpace(request.TrackingNumber))
                         return Result.Failure(OrderErrors.TrackingNumberRequired);
-                    _orderBusinessLogic.ShipOrder(order, request.TrackingNumber);
+                    _orderBusinessLogic.ShipOrder(order, request.TrackingNumber, request.CorrelationId);
                     break;
                 case OrderStatus.Delivered:
-                    _orderBusinessLogic.DeliverOrder(order);
+                    _orderBusinessLogic.DeliverOrder(order, request.CorrelationId);
                     break;
                 case OrderStatus.Cancelled:
-                    _orderBusinessLogic.CancelOrder(order);
+                    _orderBusinessLogic.CancelOrder(order, request.CorrelationId);
                     break;
                 default:
                     return Result.Failure(Error.Validation("Order.InvalidStatus", $"Status transition to {request.NewStatus} is not supported"));

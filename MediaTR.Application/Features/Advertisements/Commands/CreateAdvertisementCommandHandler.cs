@@ -23,6 +23,7 @@ public class CreateAdvertisementCommandHandler : ICommandHandler<CreateAdvertise
             request.ProductId,
             request.SellerId,
             request.Price,
+            request.CorrelationId,
             request.IsNegotiable,
             request.IsUrgent,
             request.ContactPhone,

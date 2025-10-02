@@ -53,7 +53,7 @@ public class OrderBusinessLogic
         });
     }
 
-    public void ConfirmOrder(Order order)
+    public void ConfirmOrder(Order order, Guid correlationId)
     {
         // Business rule validation
         if (order.Status != OrderStatus.Pending)
@@ -63,7 +63,7 @@ public class OrderBusinessLogic
         order.UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ProcessOrder(Order order)
+    public void ProcessOrder(Order order, Guid correlationId)
     {
         // Business rule validation
         if (order.Status != OrderStatus.Confirmed)
@@ -73,7 +73,7 @@ public class OrderBusinessLogic
         order.UpdatedAt = DateTime.UtcNow;
     }
 
-    public void ShipOrder(Order order, string trackingNumber)
+    public void ShipOrder(Order order, string trackingNumber, Guid correlationId)
     {
         // Business rule validation
         if (order.Status != OrderStatus.Processing)
@@ -88,7 +88,7 @@ public class OrderBusinessLogic
         order.UpdatedAt = DateTime.UtcNow;
     }
 
-    public void DeliverOrder(Order order)
+    public void DeliverOrder(Order order, Guid correlationId)
     {
         // Business rule validation
         if (order.Status != OrderStatus.Shipped)
@@ -99,7 +99,7 @@ public class OrderBusinessLogic
         order.UpdatedAt = DateTime.UtcNow;
     }
 
-    public void CancelOrder(Order order)
+    public void CancelOrder(Order order, Guid correlationId)
     {
         // Business rule validation
         if (!order.CanBeCancelled)

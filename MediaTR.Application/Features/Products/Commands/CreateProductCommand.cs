@@ -12,4 +12,7 @@ public record CreateProductCommand(
     string Sku,
     int StockQuantity,
     double Weight = 0
-) : ICommand<CreateProductResult>;
+) : ICommand<CreateProductResult>
+{
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+};

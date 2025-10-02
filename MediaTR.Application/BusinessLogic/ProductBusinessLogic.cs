@@ -7,7 +7,7 @@ namespace MediaTR.Application.BusinessLogic;
 
 public class ProductBusinessLogic
 {
-    public Product CreateProduct(string name, string description, Guid categoryId, Money price, string sku, int stockQuantity, double weight = 0)
+    public Product CreateProduct(string name, string description, Guid categoryId, Money price, string sku, int stockQuantity, Guid correlationId, double weight = 0)
     {
         // Business validation
         if (string.IsNullOrWhiteSpace(name))
@@ -41,7 +41,7 @@ public class ProductBusinessLogic
         product.Raise(new ProductCreatedEvent
         {
             Payload = product,
-            CorrelationId = Guid.NewGuid()
+            CorrelationId = correlationId
         });
 
         return product;

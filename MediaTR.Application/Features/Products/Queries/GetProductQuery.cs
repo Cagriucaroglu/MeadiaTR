@@ -3,7 +3,10 @@ using MediaTR.Domain.ValueObjects;
 
 namespace MediaTR.Application.Features.Products.Queries;
 
-public record GetProductQuery(Guid Id) : IQuery<GetProductResult>;
+public record GetProductQuery(Guid Id) : IQuery<GetProductResult>
+{
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+};
 
 public record GetProductResult(
     Guid Id,
