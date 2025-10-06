@@ -1,4 +1,6 @@
 using System.Reflection;
+using MediatR;
+using MediaTR.Application.Behaviors;
 using MediaTR.Application.BusinessLogic;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +13,9 @@ public static class DependencyInjection
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Add pipeline behaviors (order matters - logging should be first)
+            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
         });
 
         // Business Logic registrations
