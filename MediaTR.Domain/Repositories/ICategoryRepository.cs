@@ -1,4 +1,5 @@
 using MediaTR.Domain.Entities;
+using MediaTR.SharedKernel.Data;
 
 namespace MediaTR.Domain.Repositories;
 

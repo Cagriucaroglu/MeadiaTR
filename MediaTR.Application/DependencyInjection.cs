@@ -2,13 +2,15 @@ using System.Reflection;
 using MediatR;
 using MediaTR.Application.Behaviors;
 using MediaTR.Application.BusinessLogic;
+using MediaTR.Application.Services.OutboxProcessor;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MediaTR.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMediatR(cfg =>
         {
@@ -24,6 +26,15 @@ public static class DependencyInjection
         services.AddScoped<AdvertisementBusinessLogic>();
         services.AddScoped<OrderBusinessLogic>();
         services.AddScoped<OrderItemBusinessLogic>();
+
+        // Outbox Pattern - Background Service
+        services.Configure<OutboxProcessorOptions>(options =>
+            configuration.GetSection(OutboxProcessorOptions.SectionName));
+        services.AddHostedService<OutboxProcessor>();
+
+        // TODO: Register outbox event handlers here using keyed services
+        // Example:
+        // services.AddKeyedScoped<IOutboxEventHandler, OrderPlacedEventHandler>("OrderPlaced");
 
         return services;
     }

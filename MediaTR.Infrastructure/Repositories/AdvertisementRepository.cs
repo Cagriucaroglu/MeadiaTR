@@ -2,6 +2,7 @@ using MediaTR.Domain.Entities;
 using MediaTR.Domain.Enums;
 using MediaTR.Domain.Repositories;
 using MediaTR.Infrastructure.Configuration;
+using MediaTR.SharedKernel.Data;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 

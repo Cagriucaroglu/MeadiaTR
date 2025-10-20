@@ -61,7 +61,7 @@ public class UpdateOrderStatusCommandHandler : ICommandHandler<UpdateOrderStatus
                     : $"{order.Notes}\n{DateTime.UtcNow:yyyy-MM-dd HH:mm}: {request.Notes}";
             }
 
-            await _orderRepository.UpdateAsync(order, cancellationToken);
+            _orderRepository.Update(order);
             return Result.Success();
         }
         catch (InvalidOperationException ex)
