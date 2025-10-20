@@ -52,8 +52,9 @@ namespace MediaTR.ApiService
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            // TODO: Add Authentication & Authorization when implementing JWT
+            // app.UseAuthentication();
+            // app.UseAuthorization();
 
             app.MapControllers();
 

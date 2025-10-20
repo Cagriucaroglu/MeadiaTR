@@ -27,10 +27,12 @@ public static class DependencyInjection
         services.AddScoped<OrderBusinessLogic>();
         services.AddScoped<OrderItemBusinessLogic>();
 
-        // Outbox Pattern - Background Service
-        services.Configure<OutboxProcessorOptions>(options =>
+        // Outbox Pattern - Background Service and Processor
+        services.Configure<OutboxProcessorOptions>(cfg =>
             configuration.GetSection(OutboxProcessorOptions.SectionName));
-        services.AddHostedService<OutboxProcessor>();
+
+        services.AddSingleton<OutboxProcessor>();
+        services.AddHostedService(sp => sp.GetRequiredService<OutboxProcessor>());
 
         // TODO: Register outbox event handlers here using keyed services
         // Example:
