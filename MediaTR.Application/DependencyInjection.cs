@@ -3,6 +3,8 @@ using MediatR;
 using MediaTR.Application.Behaviors;
 using MediaTR.Application.BusinessLogic;
 using MediaTR.Application.Services.OutboxProcessor;
+using MediaTR.Application.Services.OutboxProcessor.OutboxHandlers;
+using MediaTR.SharedKernel.Outbox;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,9 +36,8 @@ public static class DependencyInjection
         services.AddSingleton<OutboxProcessor>();
         services.AddHostedService(sp => sp.GetRequiredService<OutboxProcessor>());
 
-        // TODO: Register outbox event handlers here using keyed services
-        // Example:
-        // services.AddKeyedScoped<IOutboxEventHandler, OrderPlacedEventHandler>("OrderPlaced");
+        // Outbox Event Handlers - Keyed Services (OptimatePlatform Pattern)
+        services.AddKeyedScoped<IOutboxEventHandler, OrderPlacedEventHandler>("OrderPlaced");
 
         return services;
     }

@@ -5,9 +5,13 @@ using MediaTR.Domain.Errors;
 using MediaTR.Domain.Entities;
 using MediaTR.Domain.Enums;
 using MediaTR.Domain.Events;
+using MediaTR.Domain.Events.Entities;
 using MediaTR.Domain.Repositories;
 using MediaTR.Domain.ValueObjects;
+using MediaTR.SharedKernel.Data;
+using MediaTR.SharedKernel.Outbox;
 using MediaTR.SharedKernel.ResultAndError;
+using System.Text.Json;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
@@ -18,19 +22,22 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
     private readonly OrderBusinessLogic _orderBusinessLogic;
     private readonly OrderItemBusinessLogic _orderItemBusinessLogic;
     private readonly IMediator _mediator;
+    private readonly IDbContext _dbContext;
 
     public PlaceOrderCommandHandler(
         IOrderRepository orderRepository,
         IUserRepository userRepository,
         OrderBusinessLogic orderBusinessLogic,
         OrderItemBusinessLogic orderItemBusinessLogic,
-        IMediator mediator)
+        IMediator mediator,
+        IDbContext dbContext)
     {
         _orderRepository = orderRepository;
         _userRepository = userRepository;
         _orderBusinessLogic = orderBusinessLogic;
         _orderItemBusinessLogic = orderItemBusinessLogic;
         _mediator = mediator;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<Guid>> Handle(PlaceOrderCommand request, CancellationToken cancellationToken)
@@ -77,20 +84,32 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
         // Repository'ye kaydet
         await _orderRepository.AddAsync(order);
 
+        // Outbox Event oluştur (Eventual Consistency Pattern)
+        var orderPlacedEvent = new OrderPlacedEvent
+        {
+            Payload = order,
+            CorrelationId = request.CorrelationId
+        };
+
+        var outboxEvent = new OutboxEvent
+        {
+            Id = Guid.NewGuid(),
+            EventType = "OrderPlaced",
+            AggregateId = order.Id,
+            AggregateType = nameof(Order),
+            Payload = JsonSerializer.Serialize(orderPlacedEvent),
+            Status = OutboxStatus.Pending,
+            CreatedAt = DateTimeOffset.UtcNow,
+            CorrelationId = request.CorrelationId,
+            ConsistencyLevel = ConsistencyLevel.Eventual
+        };
+
+        // OutboxEvent'i aynı transaction içinde kaydet (Atomik!)
+        var outboxRepository = _dbContext.GetRepository<OutboxEvent>();
+        await outboxRepository.AddAsync(outboxEvent);
+
         // Domain event publish edilecek (OrderBusinessLogic içinde order.Raise() çağrıldı)
-        //await _mediator.Publish(new OrderPlacedEvent
-        //{
-        //    CorrelationId = Guid.NewGuid(),
-        //    Payload = new Order
-        //    {
-        //        Id = order.Id,
-        //        UserId = order.UserId,
-        //        OrderDate = order.OrderDate,
-        //        TotalAmount = order.TotalAmount,
-        //        PaymentMethod = order.PaymentMethod
-        //    }
-        //}, cancellationToken);
-        // Request'teki CorrelationId kullanılıyor
+        // Outbox event arka planda OutboxProcessor tarafından işlenecek
 
         return Result.Success(order.Id);
     }
