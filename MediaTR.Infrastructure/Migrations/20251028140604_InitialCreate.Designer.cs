@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaTR.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251019170019_InitialCreate")]
+    [Migration("20251028140604_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

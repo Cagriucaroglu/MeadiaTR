@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MediaTR.ApiService\MediaTR.ApiService.csproj" />
+    <ProjectReference Include="..\MediaTR.MigrationService\MediaTR.MigrationService.csproj" />
     <ProjectReference Include="..\MediaTR.ServiceDefaults\MediaTR.ServiceDefaults.csproj" />
   </ItemGroup>
 

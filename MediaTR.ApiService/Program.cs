@@ -22,6 +22,9 @@ namespace MediaTR.ApiService
             // Add services to the container.
             builder.Services.AddProblemDetails(); // RFC 7807 standard
 
+            // Add Controllers
+            builder.Services.AddControllers();
+
             // Add Application layer (MediatR, OutboxProcessor, etc.)
             builder.Services.AddApplication(builder.Configuration);
 

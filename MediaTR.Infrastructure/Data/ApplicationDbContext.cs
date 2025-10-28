@@ -15,13 +15,13 @@ namespace MediaTR.Infrastructure.Data;
 /// </summary>
 public class ApplicationDbContext : DbContext, IDbContext
 {
-    private readonly IPublisher _publisher;
+    private readonly IPublisher? _publisher;
     private readonly Dictionary<Type, object> _repositories = [];
     private IDbContextTransaction? _currentTransaction;
 
     public ApplicationDbContext(
         DbContextOptions<ApplicationDbContext> options,
-        IPublisher publisher)
+        IPublisher? publisher = null)
         : base(options)
     {
         _publisher = publisher;
@@ -176,6 +176,10 @@ public class ApplicationDbContext : DbContext, IDbContext
 
     private async Task PublishDomainEventsAsync()
     {
+        // If publisher is not available (e.g., in MigrationService), skip event publishing
+        if (_publisher == null)
+            return;
+
         List<IDomainEvent> domainEvents =
             ChangeTracker
                 .Entries<BaseEntity>()
