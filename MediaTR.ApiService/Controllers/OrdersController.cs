@@ -1,4 +1,7 @@
 using MediatR;
+using MediaTR.Application.Features.Orders.Commands;
+using MediaTR.Domain.ValueObjects;
+using MediaTR.SharedKernel.ResultAndError;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediaTR.ApiService.Controllers;
@@ -14,11 +17,32 @@ public class OrdersController : ControllerBase
         _mediator = mediator;
     }
 
+    /// <summary>
+    /// Creates a new order with fire-and-wait outbox pattern
+    /// </summary>
     [HttpPost]
-    public async Task<IActionResult> CreateOrder()
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
     {
-        // TODO: Implement PlaceOrderCommand
-        return Ok("Place order endpoint");
+        // Create DTO
+        PlaceOrderDto dto = new(
+            request.UserId,
+            request.OrderItems,
+            request.ShippingAddress,
+            request.BillingAddress,
+            request.Notes,
+            request.PaymentMethod
+        );
+
+        // Create command with CommandWrapper pattern
+        PlaceOrderCommand command = new(dto, Guid.NewGuid());
+
+        // Execute command
+        Result<Guid> result = await _mediator.Send(command);
+
+        // Return result
+        return result.IsSuccess
+            ? Ok(new { OrderId = result.Value, Message = "Order created successfully" })
+            : BadRequest(new { Error = result.Error?.Description });
     }
 
     [HttpGet("{id}")]
@@ -56,3 +80,14 @@ public class OrdersController : ControllerBase
         return Ok("Get pending orders");
     }
 }
+
+/// <summary>
+/// Create order request DTO for API
+/// </summary>
+public record CreateOrderRequest(
+    Guid UserId,
+    List<OrderItemRequest> OrderItems,
+    Address ShippingAddress,
+    Address BillingAddress,
+    string? Notes = null,
+    string? PaymentMethod = null);
