@@ -4,17 +4,24 @@ using MediaTR.Domain.ValueObjects;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
-public record PlaceOrderCommand(
+/// <summary>
+/// Place order DTO
+/// </summary>
+public record PlaceOrderDto(
     Guid UserId,
     List<OrderItemRequest> OrderItems,
     Address ShippingAddress,
     Address BillingAddress,
     string? Notes = null,
-    string? PaymentMethod = null
-) : ICommand<Guid>
-{
-    public Guid CorrelationId { get; init; } = Guid.NewGuid();
-}
+    string? PaymentMethod = null);
+
+/// <summary>
+/// Place order command using CommandWrapper pattern
+/// </summary>
+public sealed record PlaceOrderCommand(
+    PlaceOrderDto Request,
+    Guid CorrelationId)
+    : CommandWrapper<PlaceOrderDto, Guid>(Request, CorrelationId);
 
 public record OrderItemRequest(
     Guid ProductId,

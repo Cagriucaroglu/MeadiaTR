@@ -1,4 +1,3 @@
-using MediatR;
 using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
 using MediaTR.Domain.Errors;
@@ -8,54 +7,53 @@ using MediaTR.Domain.Events;
 using MediaTR.Domain.Events.Entities;
 using MediaTR.Domain.Repositories;
 using MediaTR.Domain.ValueObjects;
-using MediaTR.SharedKernel.Data;
+using MediaTR.SharedKernel.BusinessLogic;
 using MediaTR.SharedKernel.Outbox;
 using MediaTR.SharedKernel.ResultAndError;
 using System.Text.Json;
 
 namespace MediaTR.Application.Features.Orders.Commands;
 
-public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
+/// <summary>
+/// PlaceOrderCommand handler with transactional support and fire-and-wait outbox pattern
+/// </summary>
+internal sealed class PlaceOrderCommandHandler : TransactionalCommandHandlerBase<PlaceOrderCommand, Guid>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IUserRepository _userRepository;
     private readonly OrderBusinessLogic _orderBusinessLogic;
     private readonly OrderItemBusinessLogic _orderItemBusinessLogic;
-    private readonly IMediator _mediator;
-    private readonly IDbContext _dbContext;
 
     public PlaceOrderCommandHandler(
+        IServiceProvider serviceProvider,
         IOrderRepository orderRepository,
         IUserRepository userRepository,
         OrderBusinessLogic orderBusinessLogic,
-        OrderItemBusinessLogic orderItemBusinessLogic,
-        IMediator mediator,
-        IDbContext dbContext)
+        OrderItemBusinessLogic orderItemBusinessLogic)
+        : base(serviceProvider)
     {
         _orderRepository = orderRepository;
         _userRepository = userRepository;
         _orderBusinessLogic = orderBusinessLogic;
         _orderItemBusinessLogic = orderItemBusinessLogic;
-        _mediator = mediator;
-        _dbContext = dbContext;
     }
 
-    public async Task<Result<Guid>> Handle(PlaceOrderCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Guid>> ProcessCommandAsync(PlaceOrderCommand request, CancellationToken cancellationToken)
     {
         // Kullanıcı kontrolü
-        User? user = await _userRepository.GetByIdAsync(request.UserId);
+        User? user = await _userRepository.GetByIdAsync(request.Request.UserId);
         if (user == null)
-            return Result.Failure<Guid>(OrderErrors.UserNotFound(request.UserId));
+            return Result.Failure<Guid>(OrderErrors.UserNotFound(request.Request.UserId));
 
         // Sipariş oluştur
         Order order = new Order
         {
             Id = Guid.NewGuid(),
-            UserId = request.UserId,
-            ShippingAddress = request.ShippingAddress,
-            BillingAddress = request.BillingAddress,
-            Notes = request.Notes,
-            PaymentMethod = request.PaymentMethod,
+            UserId = request.Request.UserId,
+            ShippingAddress = request.Request.ShippingAddress,
+            BillingAddress = request.Request.BillingAddress,
+            Notes = request.Request.Notes,
+            PaymentMethod = request.Request.PaymentMethod,
             Status = OrderStatus.Pending,
             OrderDate = DateTime.UtcNow,
             TotalAmount = Money.Zero(),
@@ -68,7 +66,7 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
         decimal totalAmount = 0;
         string currency = "USD";
 
-        foreach (var itemDto in request.OrderItems)
+        foreach (var itemDto in request.Request.OrderItems)
         {
             var orderItem = await _orderItemBusinessLogic.CreateOrderItem(order.Id, itemDto.ProductId, itemDto.Quantity);
             _orderBusinessLogic.AddOrderItem(order, orderItem);
@@ -84,7 +82,7 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
         // Repository'ye kaydet
         await _orderRepository.AddAsync(order);
 
-        // Outbox Event oluştur (Eventual Consistency Pattern)
+        // Outbox Event oluştur (Fire-and-Wait Pattern)
         var orderPlacedEvent = new OrderPlacedEvent
         {
             Payload = order,
@@ -98,19 +96,35 @@ public class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand, Guid>
             AggregateId = order.Id,
             AggregateType = nameof(Order),
             Payload = JsonSerializer.Serialize(orderPlacedEvent),
-            Status = OutboxStatus.Pending,
+            Status = OutboxStatus.Immediate,  // 🔥 Fire-and-wait mode
             CreatedAt = DateTimeOffset.UtcNow,
             CorrelationId = request.CorrelationId,
-            ConsistencyLevel = ConsistencyLevel.Eventual
+            ConsistencyLevel = ConsistencyLevel.Strong  // Strong consistency for immediate processing
         };
 
-        // OutboxEvent'i aynı transaction içinde kaydet (Atomik!)
-        var outboxRepository = _dbContext.GetRepository<OutboxEvent>();
+        // OutboxEvent'i BusinessLogicContext'e track et
+        request.BusinessLogicContext.TrackOutboxEvent(outboxEvent);
+
+        // OutboxEvent'i database'e ekle (transaction içinde)
+        var outboxRepository = Context.GetRepository<OutboxEvent>();
         await outboxRepository.AddAsync(outboxEvent);
 
-        // Domain event publish edilecek (OrderBusinessLogic içinde order.Raise() çağrıldı)
-        // Outbox event arka planda OutboxProcessor tarafından işlenecek
-
         return Result.Success(order.Id);
+    }
+
+    /// <summary>
+    /// 🔥 KRITIK: Transaction commit'ten ÖNCE event'leri işle (Fire-and-Wait)
+    /// </summary>
+    protected override async Task BeforeTransactionCommittedAsync(
+        Result<Guid> result,
+        BusinessLogicContext blContext,
+        CancellationToken cancellationToken)
+    {
+        if (result.IsSuccess)
+        {
+            // Fire-and-wait: Event'leri hemen işlemeyi dene
+            // Başarısızsa Pending'e düşecek ve background worker işleyecek
+            await ProcessOutboxEventsAsync(blContext, cancellationToken);
+        }
     }
 }
