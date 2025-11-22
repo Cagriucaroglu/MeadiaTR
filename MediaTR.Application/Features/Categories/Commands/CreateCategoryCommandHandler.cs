@@ -1,42 +1,47 @@
 using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
-using MediaTR.Application.Features.Categories.DTOs;
+using MediaTR.Domain.Entities;
+using MediaTR.Domain.Repositories;
+using MediaTR.SharedKernel.BusinessLogic;
 using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Categories.Commands;
 
-public class CreateCategoryCommandHandler : ICommandHandler<CreateCategoryCommand, CreateCategoryResult>
+/// <summary>
+/// CreateCategoryCommand handler with transactional support
+/// Note: Category creation doesn't need outbox events (no external side effects)
+/// </summary>
+internal sealed class CreateCategoryCommandHandler : TransactionalCommandHandlerBase<CreateCategoryCommand, Guid>
 {
+    private readonly ICategoryRepository _categoryRepository;
     private readonly CategoryBusinessLogic _categoryBusinessLogic;
 
-    public CreateCategoryCommandHandler(CategoryBusinessLogic categoryBusinessLogic)
+    public CreateCategoryCommandHandler(
+        IServiceProvider serviceProvider,
+        ICategoryRepository categoryRepository,
+        CategoryBusinessLogic categoryBusinessLogic)
+        : base(serviceProvider)
     {
+        _categoryRepository = categoryRepository;
         _categoryBusinessLogic = categoryBusinessLogic;
     }
 
-    public async Task<Result<CreateCategoryResult>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Guid>> ProcessCommandAsync(
+        CreateCategoryCommand request,
+        CancellationToken cancellationToken)
     {
-        // Delegate to business logic
-        var category = _categoryBusinessLogic.CreateCategory(
-            request.Name,
-            request.Description,
+        // Business logic ile category oluştur
+        Category category = _categoryBusinessLogic.CreateCategory(
+            request.Request.Name,
+            request.Request.Description,
             request.CorrelationId,
-            request.ParentCategoryId,
-            request.SortOrder
+            request.Request.ParentCategoryId,
+            request.Request.SortOrder
         );
 
-        // TODO: Save to repository
-        // await _categoryRepository.AddAsync(category, cancellationToken);
+        // Repository'ye kaydet
+        await _categoryRepository.AddAsync(category);
 
-        // Return result using implicit operator
-        return new CreateCategoryResult(
-            category.Id,
-            category.Name,
-            category.Slug,
-            category.Description,
-            category.ParentCategoryId,
-            category.SortOrder,
-            category.IsActive
-        );
+        return Result.Success(category.Id);
     }
 }

@@ -1,48 +1,52 @@
 using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Application.BusinessLogic;
-using MediaTR.Application.Features.Advertisements.DTOs;
+using MediaTR.Domain.Entities;
+using MediaTR.Domain.Repositories;
+using MediaTR.SharedKernel.BusinessLogic;
 using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.Application.Features.Advertisements.Commands;
 
-public class CreateAdvertisementCommandHandler : ICommandHandler<CreateAdvertisementCommand, CreateAdvertisementResult>
+/// <summary>
+/// CreateAdvertisementCommand handler with transactional support
+/// Note: No outbox event needed for creation - only for approval/publish
+/// </summary>
+internal sealed class CreateAdvertisementCommandHandler : TransactionalCommandHandlerBase<CreateAdvertisementCommand, Guid>
 {
+    private readonly IAdvertisementRepository _advertisementRepository;
     private readonly AdvertisementBusinessLogic _advertisementBusinessLogic;
 
-    public CreateAdvertisementCommandHandler(AdvertisementBusinessLogic advertisementBusinessLogic)
+    public CreateAdvertisementCommandHandler(
+        IServiceProvider serviceProvider,
+        IAdvertisementRepository advertisementRepository,
+        AdvertisementBusinessLogic advertisementBusinessLogic)
+        : base(serviceProvider)
     {
+        _advertisementRepository = advertisementRepository;
         _advertisementBusinessLogic = advertisementBusinessLogic;
     }
 
-    public async Task<Result<CreateAdvertisementResult>> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Guid>> ProcessCommandAsync(
+        CreateAdvertisementCommand request,
+        CancellationToken cancellationToken)
     {
-        // Delegate to business logic
-        var advertisement = _advertisementBusinessLogic.CreateAdvertisement(
-            request.Title,
-            request.Description,
-            request.ProductId,
-            request.SellerId,
-            request.Price,
+        // Business logic ile advertisement oluştur
+        Advertisement advertisement = _advertisementBusinessLogic.CreateAdvertisement(
+            request.Request.Title,
+            request.Request.Description,
+            request.Request.ProductId,
+            request.Request.SellerId,
+            request.Request.Price,
             request.CorrelationId,
-            request.IsNegotiable,
-            request.IsUrgent,
-            request.ContactPhone,
-            request.ContactEmail
+            request.Request.IsNegotiable,
+            request.Request.IsUrgent,
+            request.Request.ContactPhone,
+            request.Request.ContactEmail
         );
 
-        // TODO: Save to repository
-        // await _advertisementRepository.AddAsync(advertisement, cancellationToken);
+        // Repository'ye kaydet
+        await _advertisementRepository.AddAsync(advertisement);
 
-        // Return result using implicit operator
-        return new CreateAdvertisementResult(
-            advertisement.Id,
-            advertisement.Title,
-            advertisement.ProductId,
-            advertisement.SellerId,
-            advertisement.Price,
-            advertisement.Status.ToString(),
-            advertisement.IsNegotiable,
-            advertisement.IsUrgent
-        );
+        return Result.Success(advertisement.Id);
     }
 }

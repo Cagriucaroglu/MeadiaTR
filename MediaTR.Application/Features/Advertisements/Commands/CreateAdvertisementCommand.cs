@@ -1,10 +1,12 @@
 using MediaTR.Application.Abstractions.Messaging;
-using MediaTR.Application.Features.Advertisements.DTOs;
 using MediaTR.Domain.ValueObjects;
 
 namespace MediaTR.Application.Features.Advertisements.Commands;
 
-public record CreateAdvertisementCommand(
+/// <summary>
+/// Create advertisement DTO
+/// </summary>
+public record CreateAdvertisementDto(
     string Title,
     string Description,
     Guid ProductId,
@@ -13,8 +15,12 @@ public record CreateAdvertisementCommand(
     bool IsNegotiable = false,
     bool IsUrgent = false,
     string? ContactPhone = null,
-    string? ContactEmail = null
-) : ICommand<CreateAdvertisementResult>
-{
-    public Guid CorrelationId { get; init; } = Guid.NewGuid();
-};
+    string? ContactEmail = null);
+
+/// <summary>
+/// Create advertisement command using CommandWrapper pattern
+/// </summary>
+public sealed record CreateAdvertisementCommand(
+    CreateAdvertisementDto Request,
+    Guid CorrelationId)
+    : CommandWrapper<CreateAdvertisementDto, Guid>(Request, CorrelationId);
