@@ -38,6 +38,11 @@ public static class DependencyInjection
 
         // Outbox Event Handlers - Keyed Services (OptimatePlatform Pattern)
         services.AddKeyedScoped<IOutboxEventHandler, OrderPlacedEventHandler>("OrderPlaced");
+        services.AddKeyedScoped<IOutboxEventHandler, ProductCreatedEventHandler>("ProductCreated");
+        services.AddKeyedScoped<IOutboxEventHandler, AdvertisementPublishedEventHandler>("AdvertisementPublished");
+        services.AddKeyedScoped<IOutboxEventHandler, OrderShippedEventHandler>("OrderShipped");
+        services.AddKeyedScoped<IOutboxEventHandler, OrderDeliveredEventHandler>("OrderDelivered");
+        services.AddKeyedScoped<IOutboxEventHandler, OrderCancelledEventHandler>("OrderCancelled");
 
         return services;
     }
