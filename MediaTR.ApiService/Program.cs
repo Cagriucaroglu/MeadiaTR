@@ -22,9 +22,6 @@ namespace MediaTR.ApiService
             // Add services to the container.
             builder.Services.AddProblemDetails(); // RFC 7807 standard
 
-            // Add Controllers (will be removed later)
-            builder.Services.AddControllers();
-
             // Add Application layer (MediatR, OutboxProcessor, etc.)
             builder.Services.AddApplication(builder.Configuration);
 
@@ -61,9 +58,6 @@ namespace MediaTR.ApiService
             // TODO: Add Authentication & Authorization when implementing JWT
             // app.UseAuthentication();
             // app.UseAuthorization();
-
-            // Map Controllers (temporary, will be removed)
-            app.MapControllers();
 
             // Map Minimal API Endpoints (OptimatePlatform pattern)
             app.MapEndpoints();

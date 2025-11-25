@@ -67,7 +67,7 @@ public sealed class OrderCancelledEventHandler : IOutboxEventHandler
             // MOCK: Refund processing
             try
             {
-                await ProcessRefundAsync(order.Id, order.UserId, order.TotalAmount, cancellationToken).ConfigureAwait(false);
+                await ProcessRefundAsync(order.Id, order.UserId, order.TotalAmount.Amount, cancellationToken).ConfigureAwait(false);
                 successCount++;
             }
             catch (Exception ex)
