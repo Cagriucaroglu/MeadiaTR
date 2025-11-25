@@ -22,7 +22,7 @@ namespace MediaTR.ApiService
             // Add services to the container.
             builder.Services.AddProblemDetails(); // RFC 7807 standard
 
-            // Add Controllers
+            // Add Controllers (will be removed later)
             builder.Services.AddControllers();
 
             // Add Application layer (MediatR, OutboxProcessor, etc.)
@@ -30,6 +30,9 @@ namespace MediaTR.ApiService
 
             // Add Infrastructure layer (Repositories, MongoDB, etc.)
             builder.Services.AddInfrastructure(builder.Configuration);
+
+            // Add Minimal API Endpoints (OptimatePlatform pattern)
+            builder.Services.AddEndpoints(typeof(Program).Assembly);
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
@@ -59,7 +62,11 @@ namespace MediaTR.ApiService
             // app.UseAuthentication();
             // app.UseAuthorization();
 
+            // Map Controllers (temporary, will be removed)
             app.MapControllers();
+
+            // Map Minimal API Endpoints (OptimatePlatform pattern)
+            app.MapEndpoints();
 
             app.Run();
         }
