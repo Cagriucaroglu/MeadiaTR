@@ -2,11 +2,19 @@ using MediaTR.Domain.Entities;
 using MediaTR.Domain.Events;
 using MediaTR.Domain.ValueObjects;
 using MediaTR.SharedKernel;
+using MediaTR.SharedKernel.Time;
 
 namespace MediaTR.Application.BusinessLogic;
 
 public class ProductBusinessLogic
 {
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    public ProductBusinessLogic(IDateTimeProvider dateTimeProvider)
+    {
+        _dateTimeProvider = dateTimeProvider;
+    }
+
     public Product CreateProduct(string name, string description, Guid categoryId, Money price, string sku, int stockQuantity, Guid correlationId, double weight = 0)
     {
         // Business validation
@@ -33,8 +41,8 @@ public class ProductBusinessLogic
             Slug = GenerateSlug(name),
             IsActive = true,
             IsFeatured = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = _dateTimeProvider.UtcNow,
+            UpdatedAt = _dateTimeProvider.UtcNow
         };
 
         // Raise domain event
@@ -53,7 +61,7 @@ public class ProductBusinessLogic
             throw new ArgumentException("Stock quantity cannot be negative", nameof(quantity));
 
         product.StockQuantity = quantity;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void ReduceStock(Product product, int quantity)
@@ -65,19 +73,19 @@ public class ProductBusinessLogic
             throw new InvalidOperationException("Insufficient stock");
 
         product.StockQuantity -= quantity;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void SetActive(Product product, bool isActive)
     {
         product.IsActive = isActive;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void UpdatePrice(Product product, Money newPrice)
     {
         product.Price = newPrice;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void UpdateInfo(Product product, string name, string description)
@@ -88,7 +96,7 @@ public class ProductBusinessLogic
         product.Name = name;
         product.Description = description;
         product.Slug = GenerateSlug(name);
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void SetMainImage(Product product, string imageUrl)
@@ -97,13 +105,13 @@ public class ProductBusinessLogic
             throw new ArgumentException("Image URL cannot be empty", nameof(imageUrl));
 
         product.MainImageUrl = imageUrl;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void SetFeatured(Product product, bool isFeatured)
     {
         product.IsFeatured = isFeatured;
-        product.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     private static string GenerateSlug(string name)

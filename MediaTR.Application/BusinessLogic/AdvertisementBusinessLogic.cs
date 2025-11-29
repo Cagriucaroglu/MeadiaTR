@@ -3,11 +3,19 @@ using MediaTR.Domain.Enums;
 using MediaTR.Domain.Events;
 using MediaTR.Domain.ValueObjects;
 using MediaTR.SharedKernel;
+using MediaTR.SharedKernel.Time;
 
 namespace MediaTR.Application.BusinessLogic;
 
 public class AdvertisementBusinessLogic
 {
+    private readonly IDateTimeProvider _dateTimeProvider;
+
+    public AdvertisementBusinessLogic(IDateTimeProvider dateTimeProvider)
+    {
+        _dateTimeProvider = dateTimeProvider;
+    }
+
     public Advertisement CreateAdvertisement(string title, string description, Guid productId, Guid sellerId,
         Money price, Guid correlationId, bool isNegotiable = false, bool isUrgent = false, string? contactPhone = null, string? contactEmail = null)
     {
@@ -36,8 +44,8 @@ public class AdvertisementBusinessLogic
             ContactEmail = contactEmail,
             Status = AdvertisementStatus.Draft,
             ViewCount = 0,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = _dateTimeProvider.UtcNow,
+            UpdatedAt = _dateTimeProvider.UtcNow
         };
 
         return advertisement;
@@ -50,7 +58,7 @@ public class AdvertisementBusinessLogic
             throw new InvalidOperationException("Only draft advertisements can be submitted for approval");
 
         advertisement.Status = AdvertisementStatus.PendingApproval;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void Approve(Advertisement advertisement, Guid correlationId)
@@ -60,9 +68,9 @@ public class AdvertisementBusinessLogic
             throw new InvalidOperationException("Only pending advertisements can be approved");
 
         advertisement.Status = AdvertisementStatus.Active;
-        advertisement.PublishedAt = DateTime.UtcNow;
-        advertisement.ExpiresAt = DateTime.UtcNow.AddDays(30); // Default 30 days
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.PublishedAt = _dateTimeProvider.UtcNow;
+        advertisement.ExpiresAt = _dateTimeProvider.UtcNow.AddDays(30); // Default 30 days
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
 
         // Raise domain event
         advertisement.Raise(new AdvertisementPublishedEvent
@@ -79,7 +87,7 @@ public class AdvertisementBusinessLogic
             throw new InvalidOperationException("Only pending advertisements can be rejected");
 
         advertisement.Status = AdvertisementStatus.Rejected;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void Deactivate(Advertisement advertisement)
@@ -89,7 +97,7 @@ public class AdvertisementBusinessLogic
             throw new InvalidOperationException("Only active advertisements can be deactivated");
 
         advertisement.Status = AdvertisementStatus.Inactive;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void MarkAsSold(Advertisement advertisement)
@@ -99,13 +107,13 @@ public class AdvertisementBusinessLogic
             throw new InvalidOperationException("Only active advertisements can be marked as sold");
 
         advertisement.Status = AdvertisementStatus.Sold;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void IncrementViewCount(Advertisement advertisement)
     {
         advertisement.ViewCount++;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void UpdatePrice(Advertisement advertisement, Money newPrice)
@@ -116,7 +124,7 @@ public class AdvertisementBusinessLogic
             throw new InvalidOperationException("Only active or draft advertisements can have price updated");
 
         advertisement.Price = newPrice;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void SetMainImage(Advertisement advertisement, string imageUrl)
@@ -125,25 +133,25 @@ public class AdvertisementBusinessLogic
             throw new ArgumentException("Image URL cannot be empty", nameof(imageUrl));
 
         advertisement.MainImageUrl = imageUrl;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void UpdateContactInfo(Advertisement advertisement, string? contactPhone, string? contactEmail)
     {
         advertisement.ContactPhone = contactPhone;
         advertisement.ContactEmail = contactEmail;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void SetUrgent(Advertisement advertisement, bool isUrgent)
     {
         advertisement.IsUrgent = isUrgent;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void SetNegotiable(Advertisement advertisement, bool isNegotiable)
     {
         advertisement.IsNegotiable = isNegotiable;
-        advertisement.UpdatedAt = DateTime.UtcNow;
+        advertisement.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 }

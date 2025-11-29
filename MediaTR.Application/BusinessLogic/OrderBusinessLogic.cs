@@ -2,6 +2,7 @@ using MediaTR.Domain.Entities;
 using MediaTR.Domain.Enums;
 using MediaTR.Domain.Events;
 using MediaTR.Domain.Repositories;
+using MediaTR.SharedKernel.Time;
 
 namespace MediaTR.Application.BusinessLogic;
 
@@ -9,11 +10,16 @@ public class OrderBusinessLogic
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
+    private readonly IDateTimeProvider _dateTimeProvider;
 
-    public OrderBusinessLogic(IOrderRepository orderRepository, IProductRepository productRepository)
+    public OrderBusinessLogic(
+        IOrderRepository orderRepository,
+        IProductRepository productRepository,
+        IDateTimeProvider dateTimeProvider)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
+        _dateTimeProvider = dateTimeProvider;
     }
 
     public async Task PlaceOrder(Order order, Guid correlationId)
@@ -41,9 +47,9 @@ public class OrderBusinessLogic
 
         // Set order status and dates
         order.Status = OrderStatus.Pending;
-        order.OrderDate = DateTime.UtcNow;
-        order.CreatedAt = DateTime.UtcNow;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.OrderDate = _dateTimeProvider.UtcNow;
+        order.CreatedAt = _dateTimeProvider.UtcNow;
+        order.UpdatedAt = _dateTimeProvider.UtcNow;
 
         // Raise domain event with request CorrelationId
         order.Raise(new OrderPlacedEvent
@@ -60,7 +66,7 @@ public class OrderBusinessLogic
             throw new InvalidOperationException("Only pending orders can be confirmed");
 
         order.Status = OrderStatus.Confirmed;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void ProcessOrder(Order order, Guid correlationId)
@@ -70,7 +76,7 @@ public class OrderBusinessLogic
             throw new InvalidOperationException("Only confirmed orders can be processed");
 
         order.Status = OrderStatus.Processing;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void ShipOrder(Order order, string trackingNumber, Guid correlationId)
@@ -83,9 +89,9 @@ public class OrderBusinessLogic
             throw new ArgumentException("Tracking number is required for shipping");
 
         order.Status = OrderStatus.Shipped;
-        order.ShippedDate = DateTime.UtcNow;
+        order.ShippedDate = _dateTimeProvider.UtcNow;
         order.TrackingNumber = trackingNumber;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void DeliverOrder(Order order, Guid correlationId)
@@ -95,8 +101,8 @@ public class OrderBusinessLogic
             throw new InvalidOperationException("Only shipped orders can be delivered");
 
         order.Status = OrderStatus.Delivered;
-        order.DeliveredDate = DateTime.UtcNow;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.DeliveredDate = _dateTimeProvider.UtcNow;
+        order.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void CancelOrder(Order order, Guid correlationId)
@@ -106,7 +112,7 @@ public class OrderBusinessLogic
             throw new InvalidOperationException("Order cannot be cancelled in current status");
 
         order.Status = OrderStatus.Cancelled;
-        order.UpdatedAt = DateTime.UtcNow;
+        order.UpdatedAt = _dateTimeProvider.UtcNow;
     }
 
     public void AddOrderItem(Order order, OrderItem orderItem)

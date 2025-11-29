@@ -5,8 +5,17 @@ namespace MediaTR.SharedKernel;
 public abstract class BaseEntity
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Creation timestamp - Set via IDateTimeProvider in Business Logic layer
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Last update timestamp - Set via IDateTimeProvider in Business Logic layer
+    /// </summary>
     public DateTime? UpdatedAt { get; set; }
+
     public string? CreatedBy { get; set; }
     public string? UpdatedBy { get; set; }
 

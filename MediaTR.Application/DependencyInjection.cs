@@ -1,4 +1,5 @@
 using System.Reflection;
+using FluentValidation;
 using MediatR;
 using MediaTR.Application.Behaviors;
 using MediaTR.Application.BusinessLogic;
@@ -18,9 +19,13 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 
-            // Add pipeline behaviors (order matters - logging should be first)
-            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            // Add pipeline behaviors (ORDER MATTERS!)
+            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));        // 1. Logging (first - logs everything)
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));     // 2. Validation (before execution)
         });
+
+        // FluentValidation - Auto-register all validators from assembly
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         // Business Logic registrations
         services.AddScoped<ProductBusinessLogic>();

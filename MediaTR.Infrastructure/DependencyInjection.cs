@@ -2,7 +2,9 @@ using MediaTR.Domain.Repositories;
 using MediaTR.Infrastructure.Configuration;
 using MediaTR.Infrastructure.Data;
 using MediaTR.Infrastructure.Repositories;
+using MediaTR.Infrastructure.Time;
 using MediaTR.SharedKernel.Data;
+using MediaTR.SharedKernel.Time;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // DateTimeProvider - Singleton for time abstraction (testability)
+        services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+
         // SQL Server DbContext for Outbox Pattern (Aspire provides connection string)
         services.AddDbContext<ApplicationDbContext>(options =>
         {
