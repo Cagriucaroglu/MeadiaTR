@@ -3,6 +3,7 @@ using MediaTR.ApiService.Endpoints;
 using MediaTR.ApiService.Extensions;
 using MediaTR.Application.Features.Orders.DTOs;
 using MediaTR.Application.Features.Orders.Queries;
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.ResultAndError;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,16 +16,17 @@ internal sealed class GetUserOrders : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/orders/user/{userId:guid}", static async (
+        app.MapGet("api/orders/user/{userId:guid}", async (
             Guid userId,
             ISender sender,
+            ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
             GetUserOrdersQuery query = new(userId);
 
             Result<List<GetOrderResult>> result = await sender.Send(query, cancellationToken).ConfigureAwait(false);
 
-            return result.ToResponse();
+            return result.ToResponse(localizationService);
         })
         .WithName("GetUserOrders")
         .WithSummary("Get all orders for a user")

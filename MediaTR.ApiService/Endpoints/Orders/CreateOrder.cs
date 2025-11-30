@@ -3,6 +3,7 @@ using MediaTR.ApiService.Endpoints;
 using MediaTR.ApiService.Extensions;
 using MediaTR.Application.Features.Orders.Commands;
 using MediaTR.Domain.ValueObjects;
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.ResultAndError;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,9 +16,10 @@ internal sealed class CreateOrder : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/orders", static async (
+        app.MapPost("api/orders", async (
             [FromBody] CreateOrderRequest request,
             ISender sender,
+            ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
             Guid correlationId = request.CorrelationId != Guid.Empty
@@ -43,8 +45,8 @@ internal sealed class CreateOrder : IEndpoint
             // Execute command
             Result<Guid> result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
-            // Return result
-            return result.ToResponse();
+            // Return result with localization support
+            return result.ToResponse(localizationService);
         })
         .WithName("CreateOrder")
         .WithSummary("Creates a new order")

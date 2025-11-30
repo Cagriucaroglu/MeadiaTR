@@ -3,6 +3,7 @@ using MediaTR.ApiService.Endpoints;
 using MediaTR.ApiService.Extensions;
 using MediaTR.Application.Features.Orders.Commands;
 using MediaTR.Domain.Enums;
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.ResultAndError;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +16,11 @@ internal sealed class UpdateOrderStatus : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("api/orders/{orderId:guid}/status", static async (
+        app.MapPut("api/orders/{orderId:guid}/status", async (
             Guid orderId,
             [FromBody] UpdateOrderStatusRequest request,
             ISender sender,
+            ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
             Guid correlationId = request.CorrelationId != Guid.Empty
@@ -39,7 +41,7 @@ internal sealed class UpdateOrderStatus : IEndpoint
             // Execute command
             Result<Guid> result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
-            return result.ToResponse();
+            return result.ToResponse(localizationService);
         })
         .WithName("UpdateOrderStatus")
         .WithSummary("Update order status")

@@ -2,6 +2,7 @@ using MediatR;
 using MediaTR.ApiService.Endpoints;
 using MediaTR.ApiService.Extensions;
 using MediaTR.Application.Features.Advertisements.Commands;
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.ResultAndError;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,9 +15,10 @@ internal sealed class ApproveAdvertisement : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("api/advertisements/{advertisementId:guid}/approve", static async (
+        app.MapPut("api/advertisements/{advertisementId:guid}/approve", async (
             Guid advertisementId,
             ISender sender,
+            ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
             Guid correlationId = Guid.NewGuid();
@@ -30,7 +32,7 @@ internal sealed class ApproveAdvertisement : IEndpoint
             // Execute command
             Result<Guid> result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
-            return result.ToResponse();
+            return result.ToResponse(localizationService);
         })
         .WithName("ApproveAdvertisement")
         .WithSummary("Approve an advertisement")

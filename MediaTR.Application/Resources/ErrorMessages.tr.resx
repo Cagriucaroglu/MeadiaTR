@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Sipariş Hataları -->
+  <data name="Order.NotFound" xml:space="preserve">
+    <value>Sipariş bulunamadı</value>
+  </data>
+  <data name="Order.InvalidStatus" xml:space="preserve">
+    <value>Geçersiz sipariş durumu geçişi</value>
+  </data>
+  <data name="Order.CannotCancel" xml:space="preserve">
+    <value>Sipariş mevcut durumda iptal edilemez</value>
+  </data>
+  <data name="Order.AlreadyProcessed" xml:space="preserve">
+    <value>Sipariş zaten işlenmiş</value>
+  </data>
+
+  <!-- Ürün Hataları -->
+  <data name="Product.NotFound" xml:space="preserve">
+    <value>Ürün bulunamadı</value>
+  </data>
+  <data name="Product.InsufficientStock" xml:space="preserve">
+    <value>Ürün için yetersiz stok</value>
+  </data>
+  <data name="Product.Inactive" xml:space="preserve">
+    <value>Ürün aktif değil</value>
+  </data>
+
+  <!-- Kullanıcı Hataları -->
+  <data name="User.NotFound" xml:space="preserve">
+    <value>Kullanıcı bulunamadı</value>
+  </data>
+  <data name="User.EmailAlreadyExists" xml:space="preserve">
+    <value>E-posta adresi zaten kayıtlı</value>
+  </data>
+  <data name="User.InvalidCredentials" xml:space="preserve">
+    <value>Geçersiz e-posta veya şifre</value>
+  </data>
+
+  <!-- İlan Hataları -->
+  <data name="Advertisement.NotFound" xml:space="preserve">
+    <value>İlan bulunamadı</value>
+  </data>
+  <data name="Advertisement.InvalidStatus" xml:space="preserve">
+    <value>Geçersiz ilan durumu</value>
+  </data>
+
+  <!-- Kategori Hataları -->
+  <data name="Category.NotFound" xml:space="preserve">
+    <value>Kategori bulunamadı</value>
+  </data>
+
+  <!-- Doğrulama Hataları -->
+  <data name="Validation.Required" xml:space="preserve">
+    <value>{0} gereklidir</value>
+  </data>
+  <data name="Validation.InvalidEmail" xml:space="preserve">
+    <value>Geçersiz e-posta formatı</value>
+  </data>
+  <data name="Validation.InvalidFormat" xml:space="preserve">
+    <value>{0} için geçersiz format</value>
+  </data>
+  <data name="Validation.MinLength" xml:space="preserve">
+    <value>{0} en az {1} karakter olmalıdır</value>
+  </data>
+  <data name="Validation.MaxLength" xml:space="preserve">
+    <value>{0} en fazla {1} karakter olabilir</value>
+  </data>
+  <data name="Validation.Range" xml:space="preserve">
+    <value>{0} {1} ile {2} arasında olmalıdır</value>
+  </data>
+  <data name="Validation.Failed" xml:space="preserve">
+    <value>Doğrulama başarısız</value>
+  </data>
+
+  <!-- Genel Hatalar -->
+  <data name="Error.Unexpected" xml:space="preserve">
+    <value>Beklenmeyen bir hata oluştu</value>
+  </data>
+  <data name="Error.Unauthorized" xml:space="preserve">
+    <value>Yetkisiz erişim</value>
+  </data>
+  <data name="Error.Forbidden" xml:space="preserve">
+    <value>Erişim yasak</value>
+  </data>
+</root>

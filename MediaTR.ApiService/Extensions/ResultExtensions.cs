@@ -1,19 +1,29 @@
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.ResultAndError;
 
 namespace MediaTR.ApiService.Extensions;
 
 public static class ResultExtensions
 {
-    public static Microsoft.AspNetCore.Http.IResult ToResponse<T>(this Result<T> result)
+
+    /// <summary>
+    /// Converts Result to HTTP response WITH localization support
+    /// Uses ILocalizationService to get localized error messages based on current culture
+    /// </summary>
+    public static Microsoft.AspNetCore.Http.IResult ToResponse<T>(
+        this Result<T> result,
+        ILocalizationService localizationService)
     {
         if (result.IsSuccess)
         {
             return Results.Ok(result.Value);
         }
 
-        var errorResponse = new { error = result.Error.Code, message = result.Error.Description };
+        var error = result.Error;
+        var localizedMessage = GetLocalizedMessage(error, localizationService);
+        var errorResponse = new { error = error.Code, message = localizedMessage };
 
-        return result.Error.Type switch
+        return error.Type switch
         {
             ErrorType.NotFound => Results.NotFound(errorResponse),
             ErrorType.Validation => Results.BadRequest(errorResponse),
@@ -21,42 +31,30 @@ public static class ResultExtensions
             ErrorType.Unauthorized => Results.Unauthorized(),
             ErrorType.Forbidden => Results.Forbid(),
             _ => Results.Problem(
-                detail: result.Error.Description,
-                title: result.Error.Code,
+                detail: localizedMessage,
+                title: error.Code,
                 statusCode: 500)
         };
     }
 
-    public static Microsoft.AspNetCore.Http.IResult ToResponse(this Result result)
+    /// <summary>
+    /// Gets the localized error message if LocalizationKey is provided,
+    /// otherwise returns the default Description
+    /// </summary>
+    private static string GetLocalizedMessage(Error error, ILocalizationService localizationService)
     {
-        if (result.IsSuccess)
+        // If no localization key, return default description
+        if (string.IsNullOrEmpty(error.LocalizationKey))
         {
-            return Results.NoContent();
+            return error.Description;
         }
 
-        var errorResponse = new { error = result.Error.Code, message = result.Error.Description };
-
-        return result.Error.Type switch
+        // Get localized message using key and args
+        if (error.LocalizationArgs != null && error.LocalizationArgs.Length > 0)
         {
-            ErrorType.NotFound => Results.NotFound(errorResponse),
-            ErrorType.Validation => Results.BadRequest(errorResponse),
-            ErrorType.Conflict => Results.Conflict(errorResponse),
-            ErrorType.Unauthorized => Results.Unauthorized(),
-            ErrorType.Forbidden => Results.Forbid(),
-            _ => Results.Problem(
-                detail: result.Error.Description,
-                title: result.Error.Code,
-                statusCode: 500)
-        };
-    }
-
-    public static Microsoft.AspNetCore.Http.IResult ToCreatedResponse<T>(this Result<T> result, string location)
-    {
-        if (result.IsSuccess)
-        {
-            return Results.Created(location, result.Value);
+            return localizationService.GetString(error.LocalizationKey, error.LocalizationArgs);
         }
 
-        return result.ToResponse();
+        return localizationService.GetString(error.LocalizationKey);
     }
 }

@@ -2,6 +2,7 @@ using MediatR;
 using MediaTR.ApiService.Endpoints;
 using MediaTR.ApiService.Extensions;
 using MediaTR.Application.Features.Categories.Commands;
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.ResultAndError;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,9 +15,10 @@ internal sealed class CreateCategory : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/categories", static async (
+        app.MapPost("api/categories", async (
             [FromBody] CreateCategoryRequest request,
             ISender sender,
+            ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
             Guid correlationId = request.CorrelationId != Guid.Empty
@@ -37,7 +39,7 @@ internal sealed class CreateCategory : IEndpoint
             // Execute command
             Result<Guid> result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
-            return result.ToResponse();
+            return result.ToResponse(localizationService);
         })
         .WithName("CreateCategory")
         .WithSummary("Create a new category")

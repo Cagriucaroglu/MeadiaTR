@@ -3,8 +3,10 @@ using FluentValidation;
 using MediatR;
 using MediaTR.Application.Behaviors;
 using MediaTR.Application.BusinessLogic;
+using MediaTR.Application.Localization;
 using MediaTR.Application.Services.OutboxProcessor;
 using MediaTR.Application.Services.OutboxProcessor.OutboxHandlers;
+using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.Outbox;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,9 @@ public static class DependencyInjection
 
         // FluentValidation - Auto-register all validators from assembly
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Localization - Scoped for per-request culture handling
+        services.AddScoped<ILocalizationService, LocalizationService>();
 
         // Business Logic registrations
         services.AddScoped<ProductBusinessLogic>();
