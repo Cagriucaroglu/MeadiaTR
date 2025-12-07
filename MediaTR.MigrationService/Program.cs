@@ -10,7 +10,7 @@ builder.AddServiceDefaults();
 // DbContextFactory with retry on failure policy
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("MediaTROutbox");
+    var connectionString = builder.Configuration.GetConnectionString("MediaTRAuditTrail");
 
     options.UseSqlServer(connectionString, sqlOptions =>
     {

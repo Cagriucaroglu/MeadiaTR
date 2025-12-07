@@ -22,7 +22,7 @@ var sqlserver = builder.AddSqlServer("sqlserver", sqlPassword)
     .PublishAsConnectionString();
 
 var reportingDatabase = sqlserver.AddDatabase("MediaTRReporting");
-var outboxDatabase = sqlserver.AddDatabase("MediaTROutbox");
+var auditTrailDatabase = sqlserver.AddDatabase("MediaTRAuditTrail");
 
 // MongoDB with persistent storage and credentials
 var mongodb = builder.AddMongoDB("mongodb", userName: mongoUserName, password: mongoPassword)
@@ -43,7 +43,7 @@ var redis = builder.AddRedis("redis")
 // Add Migration Service (OptimatePlatform Init Container Pattern)
 // This service will run migrations and then exit
 var migrationService = builder.AddProject<Projects.MediaTR_MigrationService>("migration-service")
-    .WithReference(outboxDatabase)
+    .WithReference(auditTrailDatabase)
     .WaitFor(sqlserver);
 
 // Add API Service with dependencies
@@ -52,7 +52,7 @@ var apiService = builder.AddProject<Projects.MediaTR_ApiService>("mediatr-api")
     .WithReference(mongoDatabase)
     .WithReference(redis)
     .WithReference(reportingDatabase)
-    .WithReference(outboxDatabase)
+    .WithReference(auditTrailDatabase)
     .WaitFor(sqlserver)
     .WaitFor(mongodb)
     .WaitFor(redis)

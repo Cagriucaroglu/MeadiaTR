@@ -8,5 +8,10 @@
     "nuget-search",
     "mssql-mcp",
     "csMcp"
-  ]
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)"
+    ]
+  }
 }

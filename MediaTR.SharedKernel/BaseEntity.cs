@@ -9,12 +9,12 @@ public abstract class BaseEntity
     /// <summary>
     /// Creation timestamp - Set via IDateTimeProvider in Business Logic layer
     /// </summary>
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 
     /// <summary>
     /// Last update timestamp - Set via IDateTimeProvider in Business Logic layer
     /// </summary>
-    public DateTime? UpdatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     public string? CreatedBy { get; set; }
     public string? UpdatedBy { get; set; }

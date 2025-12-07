@@ -1,4 +1,5 @@
 using MediatR;
+using MediaTR.Domain.Entities;
 using MediaTR.Domain.Events.Entities;
 using MediaTR.SharedKernel;
 using MediaTR.SharedKernel.Data;
@@ -10,7 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace MediaTR.Infrastructure.Data;
 
 /// <summary>
-/// Application database context implementing IDbContext.
+/// Audit Trail database context implementing IDbContext.
+/// Contains OutboxEvents (event audit) and RefreshTokens (authentication audit).
 /// Provides repository access, transaction management, and automatic domain event publishing.
 /// </summary>
 public class ApplicationDbContext : DbContext, IDbContext
@@ -29,6 +31,7 @@ public class ApplicationDbContext : DbContext, IDbContext
 
     // DbSets
     public DbSet<OutboxEvent> OutboxEvents => Set<OutboxEvent>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public IRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity, new()
     {
