@@ -1,7 +1,10 @@
 
+using System.Text;
 using MediaTR.ApiService.Extensions;
 using MediaTR.Application;
 using MediaTR.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 namespace MediaTR.ApiService
@@ -27,6 +30,44 @@ namespace MediaTR.ApiService
 
             // Add Infrastructure layer (Repositories, MongoDB, etc.)
             builder.Services.AddInfrastructure(builder.Configuration);
+
+            // JWT Authentication Configuration
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings["SecretKey"];
+
+            if (string.IsNullOrEmpty(secretKey))
+            {
+                throw new InvalidOperationException(
+                    "JWT SecretKey is not configured. Please set it in appsettings.json or user secrets.");
+            }
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(secretKey)),
+                        ClockSkew = TimeSpan.Zero // No tolerance for token expiration
+                    };
+
+                    // Optional: Add custom token validation events (Phase C - Token Blacklist)
+                    // options.Events = new JwtBearerEvents
+                    // {
+                    //     OnTokenValidated = async context =>
+                    //     {
+                    //         // Check if token is blacklisted (Phase C)
+                    //     }
+                    // };
+                });
+
+            builder.Services.AddAuthorization();
 
             // Add Minimal API Endpoints (OptimatePlatform pattern)
             builder.Services.AddEndpoints(typeof(Program).Assembly);
@@ -55,9 +96,9 @@ namespace MediaTR.ApiService
 
             app.UseHttpsRedirection();
 
-            // TODO: Add Authentication & Authorization when implementing JWT
-            // app.UseAuthentication();
-            // app.UseAuthorization();
+            // Authentication & Authorization (JWT)
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             // Map Minimal API Endpoints (OptimatePlatform pattern)
             app.MapEndpoints();
