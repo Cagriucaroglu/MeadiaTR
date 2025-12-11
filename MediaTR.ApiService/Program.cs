@@ -69,6 +69,23 @@ namespace MediaTR.ApiService
 
             builder.Services.AddAuthorization();
 
+            // CORS Configuration for React frontend (HttpOnly cookies require credentials)
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("ReactApp", policy =>
+                {
+                    policy.WithOrigins(
+                            "http://localhost:3000",  // React dev server
+                            "http://localhost:5173",  // Vite dev server
+                            "https://localhost:3000",
+                            "https://localhost:5173"
+                        )
+                        .AllowCredentials()           // Required for HttpOnly cookies
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             // Add Minimal API Endpoints (OptimatePlatform pattern)
             builder.Services.AddEndpoints(typeof(Program).Assembly);
 
@@ -95,6 +112,9 @@ namespace MediaTR.ApiService
             app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
+
+            // CORS (must be before Authentication for preflight requests)
+            app.UseCors("ReactApp");
 
             // Authentication & Authorization (JWT)
             app.UseAuthentication();

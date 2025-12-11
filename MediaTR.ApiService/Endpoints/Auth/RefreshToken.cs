@@ -15,36 +15,57 @@ internal sealed class RefreshToken : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("api/auth/refresh", async (
-            [FromBody] RefreshTokenRequest request,
             HttpContext httpContext,
             ISender sender,
             ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
+            // Read RefreshToken from HttpOnly cookie
+            if (!httpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken)
+                || string.IsNullOrEmpty(refreshToken))
+            {
+                return Results.Unauthorized();
+            }
+
             // Get IP address from HttpContext
             string ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
             // Create command
-            RefreshTokenCommand command = new(request.RefreshToken);
+            RefreshTokenCommand command = new(refreshToken);
 
             // Execute command
             LoginResponse result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
-            return Results.Ok(result);
+            // Set new RefreshToken as HttpOnly cookie (token rotation)
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = result.RefreshTokenExpiresAt,
+                Path = "/",
+                IsEssential = true
+            };
+            httpContext.Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
+
+            // Return only AccessToken in response body
+            var apiResponse = new LoginApiResponse(
+                result.UserId,
+                result.UserName,
+                result.Email,
+                result.AccessToken,
+                result.AccessTokenExpiresAt
+            );
+
+            return Results.Ok(apiResponse);
         })
         .WithName("RefreshToken")
         .WithSummary("Refresh access token")
-        .WithDescription("Generate new access and refresh tokens using a valid refresh token")
+        .WithDescription("Generate new access and refresh tokens using HttpOnly cookie. Implements token rotation.")
         .WithOpenApi()
-        .Produces<LoginResponse>(StatusCodes.Status200OK)
+        .Produces<LoginApiResponse>(StatusCodes.Status200OK)
         .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
         .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
         .AllowAnonymous();
     }
 }
-
-/// <summary>
-/// Refresh token request DTO for API
-/// </summary>
-public record RefreshTokenRequest(
-    string RefreshToken);

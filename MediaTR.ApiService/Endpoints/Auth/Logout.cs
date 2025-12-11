@@ -14,35 +14,41 @@ internal sealed class Logout : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("api/auth/logout", async (
-            [FromBody] LogoutRequest request,
             HttpContext httpContext,
             ISender sender,
             ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
-            // Get IP address from HttpContext
-            string ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            // Read RefreshToken from HttpOnly cookie
+            if (httpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken)
+                && !string.IsNullOrEmpty(refreshToken))
+            {
+                // Get IP address from HttpContext
+                string ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            // Create command
-            LogoutCommand command = new(request.RefreshToken);
+                // Create command to revoke refresh token in database
+                LogoutCommand command = new(refreshToken);
 
-            // Execute command
-            bool result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+                // Execute command
+                await sender.Send(command, cancellationToken).ConfigureAwait(false);
+            }
 
-            return Results.Ok(new { Success = result, Message = "Logged out successfully" });
+            // Delete the HttpOnly cookie (regardless of whether token was valid)
+            httpContext.Response.Cookies.Delete("refreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Path = "/"
+            });
+
+            return Results.Ok(new { Success = true, Message = "Logged out successfully" });
         })
         .WithName("Logout")
         .WithSummary("User logout")
-        .WithDescription("Revoke refresh token and invalidate user session")
+        .WithDescription("Revoke refresh token in database and delete HttpOnly cookie")
         .WithOpenApi()
         .Produces<object>(StatusCodes.Status200OK)
-        .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-        .AllowAnonymous(); // Anyone can logout with valid refresh token
+        .AllowAnonymous(); // Anyone can logout (no auth required)
     }
 }
-
-/// <summary>
-/// Logout request DTO for API
-/// </summary>
-public record LogoutRequest(
-    string RefreshToken);
