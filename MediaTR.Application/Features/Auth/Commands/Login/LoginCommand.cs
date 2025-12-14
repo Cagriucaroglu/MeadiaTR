@@ -7,7 +7,8 @@ namespace MediaTR.Application.Features.Auth.Commands.Login;
 /// </summary>
 public record LoginCommand(
     string EmailOrUsername,
-    string Password) : IRequest<LoginResponse>;
+    string Password,
+    bool RememberMe = false) : IRequest<LoginResponse>;
 
 /// <summary>
 /// Response containing user information and authentication tokens.

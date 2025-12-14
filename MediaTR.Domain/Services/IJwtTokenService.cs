@@ -12,9 +12,10 @@ public interface IJwtTokenService
     /// </summary>
     /// <param name="user">User to generate tokens for</param>
     /// <param name="ipAddress">IP address of the requester</param>
+    /// <param name="rememberMe">If true, extends refresh token lifetime (default: false)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Token response with access and refresh tokens</returns>
-    Task<TokenResponse> GenerateTokensAsync(User user, string ipAddress, CancellationToken cancellationToken = default);
+    Task<TokenResponse> GenerateTokensAsync(User user, string ipAddress, bool rememberMe = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Refreshes access and refresh tokens using a valid refresh token.

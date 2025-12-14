@@ -57,14 +57,31 @@ namespace MediaTR.ApiService
                         ClockSkew = TimeSpan.Zero // No tolerance for token expiration
                     };
 
-                    // Optional: Add custom token validation events (Phase C - Token Blacklist)
-                    // options.Events = new JwtBearerEvents
-                    // {
-                    //     OnTokenValidated = async context =>
-                    //     {
-                    //         // Check if token is blacklisted (Phase C)
-                    //     }
-                    // };
+                    // Token Blacklist Check (Phase C)
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated = async context =>
+                        {
+                            // Get JTI (JWT ID) from token claims
+                            var jti = context.Principal?.Claims
+                                .FirstOrDefault(c => c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
+
+                            if (string.IsNullOrEmpty(jti))
+                            {
+                                context.Fail("Missing JTI claim");
+                                return;
+                            }
+
+                            // Check if token is blacklisted (revoked)
+                            var blacklistService = context.HttpContext.RequestServices
+                                .GetRequiredService<MediaTR.Domain.Services.ITokenBlacklistService>();
+
+                            if (await blacklistService.IsTokenRevokedAsync(jti))
+                            {
+                                context.Fail("Token has been revoked");
+                            }
+                        }
+                    };
                 });
 
             builder.Services.AddAuthorization();

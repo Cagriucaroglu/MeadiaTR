@@ -1,5 +1,6 @@
 using MediatR;
 using MediaTR.ApiService.Endpoints;
+using MediaTR.ApiService.Extensions;
 using MediaTR.Application.Features.Auth.Commands.Login;
 using MediaTR.SharedKernel.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,40 +21,61 @@ internal sealed class Login : IEndpoint
             ILocalizationService localizationService,
             CancellationToken cancellationToken) =>
         {
-            // Get IP address from HttpContext
-            string ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            // Get IP address and detect platform
+            string ipAddress = httpContext.GetClientIpAddress();
+            bool isMobile = httpContext.IsMobileClient();
 
-            // Create command
+            // Create command with RememberMe flag
             LoginCommand command = new(
                 request.EmailOrUsername,
-                request.Password
+                request.Password,
+                request.RememberMe
             );
 
             // Execute command
             LoginResponse result = await sender.Send(command, cancellationToken).ConfigureAwait(false);
 
-            // Set RefreshToken as HttpOnly cookie (XSS protection)
-            var cookieOptions = new CookieOptions
+            // Platform-specific response
+            if (isMobile)
             {
-                HttpOnly = true,        // JavaScript cannot access (XSS protection)
-                Secure = true,          // Only HTTPS (set false for development if needed)
-                SameSite = SameSiteMode.Strict, // CSRF protection
-                Expires = result.RefreshTokenExpiresAt,
-                Path = "/",
-                IsEssential = true      // GDPR exemption for authentication
-            };
-            httpContext.Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
+                // Mobile: Return RefreshToken in JSON response for Secure Storage
+                var mobileResponse = new LoginMobileApiResponse(
+                    result.UserId,
+                    result.UserName,
+                    result.Email,
+                    result.AccessToken,
+                    result.RefreshToken,
+                    result.AccessTokenExpiresAt,
+                    result.RefreshTokenExpiresAt
+                );
 
-            // Return only AccessToken in response body (RefreshToken is in cookie)
-            var apiResponse = new LoginApiResponse(
-                result.UserId,
-                result.UserName,
-                result.Email,
-                result.AccessToken,
-                result.AccessTokenExpiresAt
-            );
+                return Results.Ok(mobileResponse);
+            }
+            else
+            {
+                // Web: Set RefreshToken as HttpOnly cookie (XSS protection)
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,        // JavaScript cannot access (XSS protection)
+                    Secure = true,          // Only HTTPS (set false for development if needed)
+                    SameSite = SameSiteMode.Strict, // CSRF protection
+                    Expires = result.RefreshTokenExpiresAt,
+                    Path = "/",
+                    IsEssential = true      // GDPR exemption for authentication
+                };
+                httpContext.Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
 
-            return Results.Ok(apiResponse);
+                // Return only AccessToken in response body (RefreshToken is in cookie)
+                var webResponse = new LoginApiResponse(
+                    result.UserId,
+                    result.UserName,
+                    result.Email,
+                    result.AccessToken,
+                    result.AccessTokenExpiresAt
+                );
+
+                return Results.Ok(webResponse);
+            }
         })
         .WithName("Login")
         .WithSummary("User login")
@@ -72,10 +94,11 @@ internal sealed class Login : IEndpoint
 /// </summary>
 public record LoginRequest(
     string EmailOrUsername,
-    string Password);
+    string Password,
+    bool RememberMe = false);
 
 /// <summary>
-/// Login response DTO for API (RefreshToken excluded, sent as HttpOnly cookie)
+/// Login response DTO for web clients (RefreshToken excluded, sent as HttpOnly cookie)
 /// </summary>
 public record LoginApiResponse(
     Guid UserId,
@@ -83,3 +106,15 @@ public record LoginApiResponse(
     string Email,
     string AccessToken,
     DateTimeOffset AccessTokenExpiresAt);
+
+/// <summary>
+/// Login response DTO for mobile clients (RefreshToken included in response body for Secure Storage)
+/// </summary>
+public record LoginMobileApiResponse(
+    Guid UserId,
+    string UserName,
+    string Email,
+    string AccessToken,
+    string RefreshToken,
+    DateTimeOffset AccessTokenExpiresAt,
+    DateTimeOffset RefreshTokenExpiresAt);

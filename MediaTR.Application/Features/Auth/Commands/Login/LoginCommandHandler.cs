@@ -11,17 +11,20 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly ICacheService _cacheService;
 
     public LoginCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtTokenService,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        ICacheService cacheService)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
         _dateTimeProvider = dateTimeProvider;
+        _cacheService = cacheService;
     }
 
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -78,7 +81,28 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 
         // Generate JWT tokens
         // Note: IP address should be passed from API layer, using placeholder for now
-        var tokens = await _jwtTokenService.GenerateTokensAsync(user, "127.0.0.1", cancellationToken);
+        var tokens = await _jwtTokenService.GenerateTokensAsync(user, "127.0.0.1", request.RememberMe, cancellationToken);
+
+        // Cache user data for 15 minutes (performance optimization)
+        await _cacheService.SetAsync(
+            $"user:{user.Id}",
+            user,
+            TimeSpan.FromMinutes(15),
+            cancellationToken);
+
+        // Cache email → userId mapping for fast lookup (15 minutes)
+        await _cacheService.SetAsync(
+            $"user:email:{user.Email.Value.ToLowerInvariant()}",
+            user.Id.ToString(),
+            TimeSpan.FromMinutes(15),
+            cancellationToken);
+
+        // Cache username → userId mapping for fast lookup (15 minutes)
+        await _cacheService.SetAsync(
+            $"user:username:{user.UserName.ToLowerInvariant()}",
+            user.Id.ToString(),
+            TimeSpan.FromMinutes(15),
+            cancellationToken);
 
         return new LoginResponse(
             user.Id,

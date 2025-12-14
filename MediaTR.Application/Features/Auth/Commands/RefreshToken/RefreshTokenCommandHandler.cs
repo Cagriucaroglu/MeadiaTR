@@ -50,9 +50,9 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, L
         // Revoke old refresh token
         await _jwtTokenService.RevokeRefreshTokenAsync(request.RefreshToken, "127.0.0.1", cancellationToken);
 
-        // Generate new tokens
+        // Generate new tokens (preserve RememberMe preference from old token)
         // Note: IP address should be passed from API layer, using placeholder for now
-        var tokens = await _jwtTokenService.GenerateTokensAsync(user, "127.0.0.1", cancellationToken);
+        var tokens = await _jwtTokenService.GenerateTokensAsync(user, "127.0.0.1", refreshToken.IsRememberMe, cancellationToken);
 
         return new LoginResponse(
             user.Id,

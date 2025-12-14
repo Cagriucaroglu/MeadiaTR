@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)"
+    ]
+  },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "microsoft-docs",
@@ -8,10 +13,5 @@
     "nuget-search",
     "mssql-mcp",
     "csMcp"
-  ],
-  "permissions": {
-    "allow": [
-      "Bash(dir:*)"
-    ]
-  }
+  ]
 }

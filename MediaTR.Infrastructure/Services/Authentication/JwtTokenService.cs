@@ -37,6 +37,7 @@ public sealed class JwtTokenService : IJwtTokenService
     public async Task<TokenResponse> GenerateTokensAsync(
         User user,
         string ipAddress,
+        bool rememberMe = false,
         CancellationToken cancellationToken = default)
     {
         var jti = Guid.NewGuid().ToString();
@@ -44,7 +45,12 @@ public sealed class JwtTokenService : IJwtTokenService
         var refreshTokenValue = GenerateRefreshTokenValue();
 
         var accessTokenExpiresAt = _dateTimeProvider.OffsetUtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
-        var refreshTokenExpiresAt = _dateTimeProvider.OffsetUtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
+
+        // Use extended expiration if RememberMe is enabled
+        var refreshTokenExpirationDays = rememberMe
+            ? _jwtSettings.RememberMeExpirationDays
+            : _jwtSettings.RefreshTokenExpirationDays;
+        var refreshTokenExpiresAt = _dateTimeProvider.OffsetUtcNow.AddDays(refreshTokenExpirationDays);
 
         // Hash refresh token before storing (SHA256)
         var hashedRefreshToken = HashToken(refreshTokenValue);
@@ -58,7 +64,8 @@ public sealed class JwtTokenService : IJwtTokenService
             JwtId = jti,
             ExpiresAt = refreshTokenExpiresAt,
             CreatedByIp = ipAddress,
-            CreatedAt = _dateTimeProvider.OffsetUtcNow
+            CreatedAt = _dateTimeProvider.OffsetUtcNow,
+            IsRememberMe = rememberMe
         };
 
         _dbContext.RefreshTokens.Add(refreshToken);

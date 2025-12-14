@@ -68,7 +68,8 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
 
         // Generate JWT tokens (will also save refresh token to SQL Server)
         // Note: IP address should be passed from API layer, using placeholder for now
-        var tokens = await _jwtTokenService.GenerateTokensAsync(user, "127.0.0.1", cancellationToken);
+        // Default to rememberMe=false for registration (user can enable later during login)
+        var tokens = await _jwtTokenService.GenerateTokensAsync(user, "127.0.0.1", false, cancellationToken);
 
         return new RegisterResponse(
             user.Id,

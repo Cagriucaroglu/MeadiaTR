@@ -13,4 +13,5 @@ public class JwtSettings
     public string Audience { get; set; } = string.Empty;
     public int AccessTokenExpirationMinutes { get; set; } = 15;
     public int RefreshTokenExpirationDays { get; set; } = 7;
+    public int RememberMeExpirationDays { get; set; } = 30;
 }

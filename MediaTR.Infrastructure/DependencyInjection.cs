@@ -4,6 +4,7 @@ using MediaTR.Infrastructure.Configuration;
 using MediaTR.Infrastructure.Data;
 using MediaTR.Infrastructure.Repositories;
 using MediaTR.Infrastructure.Services.Authentication;
+using MediaTR.Infrastructure.Services.Cache;
 using MediaTR.Infrastructure.Time;
 using MediaTR.SharedKernel.Data;
 using MediaTR.SharedKernel.Time;
@@ -62,6 +63,10 @@ public static class DependencyInjection
             options.Configuration = configuration.GetConnectionString("redis");
             options.InstanceName = "MediaTR:";
         });
+
+        // Cache Services (uses IDistributedCache which is provided by StackExchangeRedisCache)
+        services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
 
         // Data Protection - Store keys in Redis for multi-instance support
         var redisConnectionString = configuration.GetConnectionString("redis");
