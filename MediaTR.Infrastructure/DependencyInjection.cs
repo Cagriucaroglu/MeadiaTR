@@ -5,6 +5,7 @@ using MediaTR.Infrastructure.Data;
 using MediaTR.Infrastructure.Repositories;
 using MediaTR.Infrastructure.Services.Authentication;
 using MediaTR.Infrastructure.Services.Cache;
+using MediaTR.Infrastructure.Services.Cart;
 using MediaTR.Infrastructure.Time;
 using MediaTR.SharedKernel.Data;
 using MediaTR.SharedKernel.Time;
@@ -67,6 +68,9 @@ public static class DependencyInjection
         // Cache Services (uses IDistributedCache which is provided by StackExchangeRedisCache)
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<ITokenBlacklistService, TokenBlacklistService>();
+
+        // Shopping Cart Service (Redis-based)
+        services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
         // Data Protection - Store keys in Redis for multi-instance support
         var redisConnectionString = configuration.GetConnectionString("redis");
