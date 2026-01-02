@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IWishlistRepository, WishlistRepository>();
 
         // JWT Settings Configuration - Bind appsettings.json JwtSettings section
         services.Configure<JwtSettings>(options =>

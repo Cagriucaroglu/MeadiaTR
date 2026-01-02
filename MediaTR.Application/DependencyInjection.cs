@@ -38,6 +38,8 @@ public static class DependencyInjection
         services.AddScoped<AdvertisementBusinessLogic>();
         services.AddScoped<OrderBusinessLogic>();
         services.AddScoped<OrderItemBusinessLogic>();
+        services.AddScoped<ShoppingCartBusinessLogic>();
+        services.AddScoped<WishlistBusinessLogic>();
 
         // Outbox Pattern - Background Service and Processor
         services.Configure<OutboxProcessorOptions>(cfg =>
