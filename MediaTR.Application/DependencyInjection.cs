@@ -6,6 +6,7 @@ using MediaTR.Application.BusinessLogic;
 using MediaTR.Application.Localization;
 using MediaTR.Application.Services.OutboxProcessor;
 using MediaTR.Application.Services.OutboxProcessor.OutboxHandlers;
+using MediaTR.Domain.Services;
 using MediaTR.SharedKernel.Localization;
 using MediaTR.SharedKernel.Outbox;
 using Microsoft.Extensions.Configuration;
