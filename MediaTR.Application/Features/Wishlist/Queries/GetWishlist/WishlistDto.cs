@@ -20,5 +20,5 @@ public record WishlistDto(
     Guid UserId,
     IReadOnlyList<WishlistProductDto> Products,
     int TotalCount,
-    DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);

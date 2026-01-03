@@ -1,4 +1,3 @@
-using MediaTR.Application.BusinessLogic;
 using MediaTR.Domain.Entities;
 using MediaTR.Domain.Entities.InMemory;
 using MediaTR.Domain.Repositories;

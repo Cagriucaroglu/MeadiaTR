@@ -2,27 +2,30 @@ using MediaTR.Application.Abstractions.Messaging;
 using MediaTR.Domain.Repositories;
 using MediaTR.SharedKernel.ResultAndError;
 
-namespace MediaTR.Application.Features.Products.Queries;
+namespace MediaTR.Application.Features.Products.Queries.GetProductBySlug;
 
 /// <summary>
-/// Get product by ID query handler (uses Redis cache via repository)
+/// Get product by slug query handler (uses Redis cache - 1 hour TTL)
+/// SEO-friendly product detail endpoint
 /// </summary>
-internal sealed class GetProductQueryHandler : IQueryHandler<GetProductQuery, GetProductResult>
+internal sealed class GetProductBySlugQueryHandler : IQueryHandler<GetProductBySlugQuery, GetProductResult>
 {
     private readonly IProductRepository _productRepository;
 
-    public GetProductQueryHandler(IProductRepository productRepository)
+    public GetProductBySlugQueryHandler(IProductRepository productRepository)
     {
         _productRepository = productRepository;
     }
 
-    public async Task<Result<GetProductResult>> Handle(GetProductQuery request, CancellationToken cancellationToken)
+    public async Task<Result<GetProductResult>> Handle(
+        GetProductBySlugQuery request,
+        CancellationToken cancellationToken)
     {
         // Get from repository (Redis cache → MongoDB fallback)
-        var product = await _productRepository.GetByIdAsync(request.Id, cancellationToken);
+        var product = await _productRepository.GetBySlugAsync(request.Slug, cancellationToken);
 
         if (product == null)
-            return Error.NotFound("Product.NotFound", $"Product with ID {request.Id} not found");
+            return Error.NotFound("Product.NotFound", $"Product with slug '{request.Slug}' not found");
 
         return new GetProductResult(
             product.Id,

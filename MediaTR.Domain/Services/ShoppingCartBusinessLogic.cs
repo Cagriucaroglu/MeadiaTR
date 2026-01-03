@@ -2,7 +2,7 @@ using MediaTR.Domain.Entities;
 using MediaTR.Domain.Entities.InMemory;
 using MediaTR.SharedKernel.Time;
 
-namespace MediaTR.Application.BusinessLogic;
+namespace MediaTR.Domain.Services;
 
 /// <summary>
 /// Shopping cart business logic

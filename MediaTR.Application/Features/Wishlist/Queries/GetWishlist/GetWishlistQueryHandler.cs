@@ -1,8 +1,9 @@
-using MediaTR.Domain.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+using MediaTR.Domain.Repositories;
 using MediaTR.Domain.Services;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
+using System.Security.Claims;
 
 namespace MediaTR.Application.Features.Wishlist.Queries.GetWishlist;
 
@@ -71,7 +72,7 @@ internal sealed class GetWishlistQueryHandler : IRequestHandler<GetWishlistQuery
                 Array.Empty<WishlistProductDto>(),
                 0,
                 wishlist.CreatedAt,
-                wishlist.UpdatedAt);
+                wishlist.UpdatedAt ?? DateTimeOffset.Now);
         }
 
         // Fetch all products in parallel
@@ -87,7 +88,7 @@ internal sealed class GetWishlistQueryHandler : IRequestHandler<GetWishlistQuery
                 p.Name,
                 p.Description,
                 p.Price.Amount,
-                p.Images?.FirstOrDefault(),
+                p.MainImageUrl,
                 p.IsActive,
                 p.StockQuantity))
             .ToList();
@@ -98,7 +99,7 @@ internal sealed class GetWishlistQueryHandler : IRequestHandler<GetWishlistQuery
             productDtos,
             productDtos.Count,
             wishlist.CreatedAt,
-            wishlist.UpdatedAt);
+            wishlist.UpdatedAt ?? DateTimeOffset.Now);
     }
 
     private static string GetWishlistCacheKey(Guid userId) => $"wishlist:{userId}";
