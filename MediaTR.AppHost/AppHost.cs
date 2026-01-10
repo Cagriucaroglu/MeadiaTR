@@ -2,7 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 // Add parameters for database credentials (from user secrets)
 var sqlPassword = builder.AddParameter("mediatr-sql-password", secret: true);
-var mongoUserName = builder.AddParameter("mediatr-mongo-username");
+var mongoUserName = builder.AddParameter("mediatr-mongo-username", secret: true);
 var mongoPassword = builder.AddParameter("mediatr-mongo-password", secret: true);
 
 // Get persistent data path from PROJECT_DATA environment variable
